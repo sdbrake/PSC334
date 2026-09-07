@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Global Growth and Inequality</title>
+<style>
+  :root{
+    --paper:#f2efe9; --paper2:#e6e2d9; --ink:#1f2933; --muted:#77808c;
+    --olive:#2f7d5b; --rust:#c1502f; --amber:#b07d2b; --violet:#4a6fa5; --navy:#182030;
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);overflow:hidden}
+  #stage{position:fixed;inset:0}
+  #canvas{width:1920px;height:1080px;transform-origin:0 0;position:relative;background:var(--paper);color:var(--ink)}
+  .s{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s ease;display:flex;flex-direction:column}
+  .s.on{opacity:1;pointer-events:auto}
+  .eyebrow{font-family:var(--sans);font-size:26px;letter-spacing:.32em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+  .headline{font-family:var(--serif);font-weight:600;line-height:1.04}
+  .rail{display:grid;gap:24px}
+  .rail .f{display:flex;gap:24px;align-items:baseline}
+  .rail .dot{flex:none;width:14px;height:14px;border-radius:50%;margin-top:14px}
+  .rail .t{font-size:42px;line-height:1.32}
+  .rail .t b{font-weight:600}
+  .conseq{margin-left:50px;margin-top:2px;display:grid;gap:14px}
+  .ed .rail .conseq .f{border-bottom:none;padding-bottom:0;gap:18px}
+  .conseq .c{flex:none;width:10px;height:10px;border-radius:50%;margin-top:14px;background:var(--muted)}
+  .conseq .t{font-size:32px}
+  /* stepwise reveal: list bullets appear one at a time on Space/Arrow */
+  .rail > .f{opacity:0;transform:translateY(10px);transition:opacity .28s ease,transform .28s ease}
+  .rail > .f.on{opacity:1;transform:none}
+  .rail > .conseq{opacity:0;transform:translateY(10px);transition:opacity .28s ease,transform .28s ease}
+  .rail > .conseq.vis{opacity:1;transform:none}
+  .meter{position:absolute;left:170px;right:170px;bottom:40px;height:64px}
+  .meter .ml,.meter .mr{position:absolute;top:0;font-size:22px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+  .meter .ml{left:0}.meter .mr{right:0}
+  .meter .track{position:absolute;top:42px;left:10px;right:10px;height:5px;border-radius:999px;
+    background:linear-gradient(to right,var(--rust) 0%,#c0a173 45%,var(--olive) 100%);opacity:.55}
+  .meter i{position:absolute;top:33px;left:var(--pos,50%);width:22px;height:22px;border-radius:50%;
+    background:var(--ink);transform:translateX(-50%);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+  .cover{align-items:center;justify-content:center;text-align:center;background:var(--navy);color:var(--paper)}
+  .cover .eyebrow{color:#b8ab8c}
+  .cover h1{font-size:138px;letter-spacing:.005em;line-height:.96;margin:30px 0 8px;max-width:1700px}
+  .school{align-items:center;justify-content:center;text-align:center;padding:0 170px}
+  .school h2{font-family:var(--serif);font-weight:600;font-size:118px;line-height:1.02}
+  .school .acc{width:120px;height:8px;border-radius:999px;margin:38px auto 0}
+  .ed{padding:150px 170px 170px}
+  .ed .headline{font-size:88px;margin-top:16px}
+  .ed .rail{margin-top:60px}
+  .ed .rail .f{padding-bottom:20px;border-bottom:1px solid rgba(38,48,62,.15)}
+  .ed .rail .f:last-child{border-bottom:none}
+  /* interlude */
+  .inter{align-items:center;justify-content:center;text-align:center}
+  .navy{background:var(--navy);color:var(--paper)}
+  .warimg{background-size:cover;background-position:center}
+  .warimg.lightimg .eyebrow,.warimg.lightimg h2{text-shadow:0 2px 14px rgba(24,32,48,.85),0 0 4px rgba(24,32,48,.55)}
+  .imgfit{align-items:center;justify-content:center;padding:64px}
+  .imgfit img{flex:1;min-height:0;width:100%;object-fit:contain;border-radius:14px;box-shadow:0 22px 60px rgba(24,32,48,.18)}
+  .imgfit.big{padding:18px}
+  .imgfit.keep img{flex:none;width:auto;height:auto;max-width:100%;max-height:100%}
+  .inter h2{font-family:var(--serif);font-size:160px;font-weight:600;line-height:1.04}
+  /* quote */
+  .quote{align-items:center;justify-content:center;text-align:center;padding:0 220px}
+  .quote .mark{font-family:var(--serif);font-size:190px;line-height:0;color:var(--amber)}
+  .quote p{font-family:var(--serif);font-style:italic;font-size:62px;line-height:1.35}
+  .quote .att{font-family:var(--sans);font-size:26px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:48px}
+  /* era accent rails */
+  .olive .eyebrow,.olive .rail .dot{color:var(--olive)} .olive .rail .dot{background:var(--olive)}
+  .rust .eyebrow,.rust .rail .dot{color:var(--rust)} .rust .rail .dot{background:var(--rust)}
+  .amber .eyebrow,.amber .rail .dot{color:var(--amber)} .amber .rail .dot{background:var(--amber)}
+  .violet .eyebrow,.violet .rail .dot{color:var(--violet)} .violet .rail .dot{background:var(--violet)}
+  /* dual open/closed meters (immigration vs trade) */
+  .meters2{position:absolute;left:170px;right:170px;bottom:26px;display:flex;gap:110px}
+  .m2{position:relative;flex:1;height:96px}
+  .m2 .m2name{position:absolute;top:0;left:4px;font-size:24px;letter-spacing:.26em;text-transform:uppercase;font-weight:700;color:var(--ink)}
+  .m2 .m2l,.m2 .m2r{position:absolute;top:34px;font-size:20px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+  .m2 .m2l{left:4px}.m2 .m2r{right:4px}
+  .m2 .m2track{position:absolute;top:70px;left:10px;right:10px;height:5px;border-radius:999px;
+    background:linear-gradient(to right,var(--rust) 0%,#c0a173 45%,var(--olive) 100%);opacity:.55}
+  .m2 i{position:absolute;top:61px;left:var(--pos,50%);width:22px;height:22px;border-radius:50%;
+    background:var(--ink);transform:translateX(-50%);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+  .strike{text-decoration:line-through;text-decoration-color:rgba(193,80,47,.55);text-decoration-thickness:6px;color:var(--muted)}
+  #progress{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(38,48,62,.08);z-index:5}
+  #barfill{height:100%;width:0;background:var(--navy)}
+  @media (prefers-reduced-motion:reduce){.s,.rail>.f{transition:none}}
+  /* Review-only: keep the final sentence inside this densely populated slide. */
+  .ed.review-compact { padding-top:110px; padding-bottom:80px; }
+  .ed.review-compact .rail { margin-top:32px; gap:16px; }
+  .ed.review-compact .rail > .f { padding-bottom:14px; }
+  .ed.review-compact .conseq { gap:10px; }
+</style>
+</head>
+<body>
+<div id="progress"><div id="barfill"></div></div>
+<div id="stage"><div id="canvas">
+
+  <!-- 1. cover -->
+  <section class="s cover">
+    <p class="eyebrow">global growth &nbsp;&middot;&nbsp; global inequality &nbsp;&middot;&nbsp; immigration</p>
+    <h1>The Effect of the Global Trade Regime</h1>
+  </section>
+
+  <!-- 2. part divider: growth -->
+  <section class="s school">
+    <p class="eyebrow">part one</p>
+    <h2 style="color:var(--olive)">Growth</h2>
+    <div class="acc" style="background:var(--olive)"></div>
+  </section>
+
+  <!-- 3. chapter beat: the world is growing -->
+  <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/growth-shanghai.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">part one &nbsp;·&nbsp; growth</p>
+    <h2 style="color:var(--paper)">THE WORLD IS GROWING</h2>
+  </section>
+
+  <!-- 4. the 90s-10s -->
+  <section class="s ed olive">
+    <p class="eyebrow">growth &nbsp;·&nbsp; the 90s&ndash;10s</p>
+    <h2 class="headline">The 90s&ndash;10s</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">A period of unprecedented growth in the developing world.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">A period of industrialization and development in some regions.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">A period of stagnation in others.</span></div>
+    </div>
+  </section>
+
+  <!-- 5. avg income by region -->
+  <section class="s imgfit big">
+    <img src="images/avg-income-regions.jpg" alt="Average incomes by world region, 1820-2022">
+  </section>
+
+  <!-- 6. incomes across distribution -->
+  <section class="s imgfit big">
+    <img src="images/incomes-across-distribution-wb.png" alt="Threshold income or consumption by decile, across countries">
+  </section>
+
+  <!-- 7. growth has increased over time -->
+  <section class="s ed olive">
+    <p class="eyebrow">growth &nbsp;·&nbsp; over time</p>
+    <h2 class="headline">Growth has increased over time</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The industrial revolution led to 0.5% annual productivity growth.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The prewar era led to 1% annual productivity growth.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The postwar era had 3% annual productivity growth.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Postwar Asia had 7&ndash;8%.</span></div>
+    </div>
+  </section>
+
+  <!-- 8. convergence is uncommon: review-only spacing repair, wording unchanged -->
+  <section class="s ed olive review-compact">
+    <p class="eyebrow">growth &nbsp;·&nbsp; convergence</p>
+    <h2 class="headline">Convergence is uncommon</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Developing late should mean faster development.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">But most developing countries do not grow more quickly than developed economies.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">There are meaningful exceptions (East Asia).</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Development scholars have identified a few things correlated with faster growth:</b></span></div>
+      <div class="conseq">
+        <div class="f"><span class="c"></span><span class="t">human capital</span></div>
+        <div class="f"><span class="c"></span><span class="t">investment</span></div>
+        <div class="f"><span class="c"></span><span class="t">institution quality</span></div>
+        <div class="f"><span class="c"></span><span class="t">exposure to trade</span></div>
+        <div class="f"><span class="c"></span><span class="t">stability</span></div>
+      </div>
+      <div class="f"><span class="dot"></span><span class="t">But all of those things have serious endogeneity problems.</span></div>
+    </div>
+  </section>
+
+  <!-- 9. diversification -->
+  <section class="s ed olive">
+    <p class="eyebrow">growth &nbsp;·&nbsp; development</p>
+    <h2 class="headline">Economic development goes hand-in-hand with diversification</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Poor countries have structurally different economies than rich countries.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">To industrialize, people have to move and radically transform their lifestyles in disruptive ways.</span></div>
+    </div>
+  </section>
+
+  <!-- 10. not all industries equally valuable -->
+  <section class="s ed olive">
+    <p class="eyebrow">growth &nbsp;·&nbsp; industries</p>
+    <h2 class="headline">Not all industries are equally valuable</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Virtually all sustained high growth rates came from manufacturing booms.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Only oil can compete with manufacturing in terms of growth potential.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Manufacturing sectors experience convergence faster than other industries.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Even successful manufacturing sectors make up small portions of their economies.</span></div>
+    </div>
+  </section>
+
+  <!-- 11. part divider: inequality -->
+  <section class="s school">
+    <p class="eyebrow">part two</p>
+    <h2 style="color:var(--violet)">Inequality</h2>
+    <div class="acc" style="background:var(--violet)"></div>
+  </section>
+
+  <!-- 12. chapter beat: the world is unequal -->
+  <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/inequality-kibera.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">part two &nbsp;·&nbsp; inequality</p>
+    <h2 style="color:var(--paper)">THE WORLD IS UNEQUAL</h2>
+  </section>
+
+  <!-- 13. three types -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; three types</p>
+    <h2 class="headline">Three Types of Inequality</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t"><b>Inequality 1:</b> International Inequality</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Inequality 2:</b> Population Inequality</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Inequality 3:</b> Global Inequality</span></div>
+    </div>
+  </section>
+
+  <!-- 14. inequality 1 -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality 1</p>
+    <h2 class="headline">International Inequality</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">How wealthy a nation is compared to other nations.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Often measured by GDP or mean/median household income.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Rich countries and poor countries.</span></div>
+    </div>
+  </section>
+
+  <!-- 15. inequality 2 -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality 2</p>
+    <h2 class="headline">Population Inequality</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">How wealthy a nation is, considering their population.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Often measured by GDP per capita.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Very large poor countries matter more for inequality.</span></div>
+    </div>
+  </section>
+
+  <!-- 16. inequality 3 -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality 3</p>
+    <h2 class="headline">Global Inequality</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Drop countries and states entirely.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">A poor person in a middle-income country might be a wealthy person in a poor country.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Hard to collect data on.</span></div>
+    </div>
+  </section>
+
+  <!-- 17. three concepts figure -->
+  <section class="s imgfit">
+    <img class="keep" src="images/three-concepts-inequality.png" alt="Milanovic three concepts of inequality">
+  </section>
+
+  <!-- 18. milanovic gini chart -->
+  <section class="s imgfit">
+    <img src="images/milanovic chart.jpg" alt="Global income inequality by concept, 1950-2010 (Gini)">
+  </section>
+
+  <!-- 19. implication -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">the implication</p>
+    <h2 style="color:#f2efe9">Which type of inequality we look at matters</h2>
+  </section>
+
+  <!-- 20. who won -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; winners</p>
+    <h2 class="headline">Who Won Globalization?</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The top 1% of global income had a 60% increase from 2000&ndash;2010.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The global median had an 80% increase during the same period.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The bottom 1/3 had 40&ndash;70% income increases.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The number of people in &ldquo;absolute poverty&rdquo; fell in half during those years.</span></div>
+    </div>
+  </section>
+
+  <!-- 21. who did not win -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; the rest</p>
+    <h2 class="headline">Who <span class="strike">Lost</span> Did Not Win Globalization?</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The poorest 5% saw no income change.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The global upper-middle class (75th&ndash;90th percentile) saw no income change.</span></div>
+    </div>
+  </section>
+
+  <!-- 22. global elite -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; the global elite</p>
+    <h2 class="headline">Who are the Global Elite &mdash; top 1%?</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">60 million people.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">12% of Americans.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">3&ndash;6% of Britons, Japanese, Germans, and French.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">1% of Italians, Spaniards, Portuguese, Greeks, Brazilians, Russians, and South Africans.</span></div>
+    </div>
+  </section>
+
+  <!-- 23. consider asia -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; asia</p>
+    <h2 class="headline">Consider Asia</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">In 1988, the median income Chinese person was richer than 10% of the world&rsquo;s population.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">In 2008, the median income Chinese person was richer than 50% of the world&rsquo;s population.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">In 1988, the median income Indian person was richer than 10% of the world&rsquo;s population.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">In 2008, the median income Indian person was richer than 27% of the world&rsquo;s population.</span></div>
+    </div>
+  </section>
+
+  <!-- 24. china/india chart -->
+  <section class="s imgfit">
+    <img src="images/worldeconomicsasia.png" alt="China's and India's GDP per capita growth">
+  </section>
+
+  <!-- 25. losers -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; losers</p>
+    <h2 class="headline">Losers in that period:</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Many African countries.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Some Latin American countries.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Most post-communist countries.</span></div>
+    </div>
+  </section>
+
+  <!-- 26. examples -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; examples</p>
+    <h2 class="headline">Examples:</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The average Kenyan went from the 22nd to the 12th percentile.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The average Nigerian went from the 16th to the 13th percentile.</span></div>
+      <div class="conseq">
+        <div class="f"><span class="c"></span><span class="t">despite overall growth</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 27. sources of inequality -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; sources</p>
+    <h2 class="headline">Sources of Inequality:</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t"><b>Two sources:</b></span></div>
+      <div class="conseq">
+        <div class="f"><span class="c"></span><span class="t">differences within nations</span></div>
+        <div class="f"><span class="c"></span><span class="t">differences between nations</span></div>
+      </div>
+      <div class="f"><span class="dot"></span><span class="t">In 1870, difference within nations accounted for 2/3 of global inequality.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">In 2010, differences between nations accounted for 2/3 of global inequality.</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Location has replaced Class.</b></span></div>
+      <div class="f"><span class="dot"></span><span class="t">Where you are born matters more than whether or not you are rich or poor where you are.</span></div>
+    </div>
+  </section>
+
+  <!-- 28. modern wealth -->
+  <section class="s ed violet">
+    <p class="eyebrow">inequality &nbsp;·&nbsp; modern wealth</p>
+    <h2 class="headline">Modern Wealth:</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Citizenship / residence is the greatest determinant of standard of living.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Inequality causes tension. Tension causes conflict.</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Only three ways to reduce the tension:</b></span></div>
+      <div class="conseq">
+        <div class="f"><span class="c"></span><span class="t">poor countries achieve high growth rates</span></div>
+        <div class="f"><span class="c"></span><span class="t">global redistribution is implemented by policy</span></div>
+        <div class="f"><span class="c"></span><span class="t">the people in the poor countries come to the rich countries</span></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 29. part divider: immigration -->
+  <section class="s school">
+    <p class="eyebrow">part three</p>
+    <h2 style="color:var(--rust)">Immigration</h2>
+    <div class="acc" style="background:var(--rust)"></div>
+  </section>
+
+  <!-- 30. immigration policy: depends on what you study -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; what you study</p>
+    <h2 class="headline">Immigration Policy: Depends on what you study</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t"><b>Prejudice and Racism?</b> Immigration policy is just a form of oppression.</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Political Economy of Income?</b> Immigration policy is a fight between labor and capital.</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>State and Institutional Concerns?</b> Immigration is about fiscal costs of immigrants vs economic benefit of labor.</span></div>
+    </div>
+  </section>
+
+  <!-- 31. the trade tradeoff -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; the trade tradeoff</p>
+    <h2 class="headline">The Trade Tradeoff</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Trade policy affects the composition of firms.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Trade policy changes what inputs are needed.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Immigration policy changes the availability of labor.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Immigration and Free Trade are in TENSION in developed economies.</span></div>
+    </div>
+  </section>
+
+  <!-- 32. trade posture is not exogenous -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; trade posture</p>
+    <h2 class="headline">Trade posture is not exogenous</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Policymakers choose a trade policy that is affected by lobbyists or bribes.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Closed trade harms consumers and helps domestic industry.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Open trade harms domestic industry and helps consumers.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Domestic industries lobby for protection, and then require labor.</span></div>
+    </div>
+  </section>
+
+  <!-- 33. complicated causes -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; causes</p>
+    <h2 class="headline">Complicated Causes</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Does trade policy cause immigration policy?</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Or does immigration policy cause trade policy?</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Might open immigration remove specialization?</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Might trade remove regional inequality?</span></div>
+    </div>
+  </section>
+
+  <!-- 34. chapter beat: alexander hamilton -->
+  <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/hamilton.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">immigration &nbsp;·&nbsp; hamilton</p>
+    <h2 style="color:var(--paper)">ALEXANDER HAMILTON</h2>
+  </section>
+
+  <!-- 35. hamiltonian economics -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; hamiltonian economics</p>
+    <h2 class="headline">Hamiltonian Economics</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Raise tariffs.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Open immigration.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Protect infant industries, like the cities wanted.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Allow access to labor, to appease the farms.</span></div>
+    </div>
+    <div class="meters2">
+      <div class="m2" style="--pos:90%"><span class="m2name">immigration</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+      <div class="m2" style="--pos:10%"><span class="m2name">trade</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+    </div>
+  </section>
+
+  <!-- 36. interlude: history of immigration -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">immigration &nbsp;·&nbsp; the arc</p>
+    <h2 style="color:#f2efe9">History of Immigration</h2>
+  </section>
+
+  <!-- 37. nineteenth century -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; nineteenth century</p>
+    <h2 class="headline">Nineteenth Century</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">States restricted trade for tariff revenue.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Domestic industries ruled (feedback loop).</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Domestic industries wanted lower wages, opened immigration.</span></div>
+    </div>
+    <div class="meters2">
+      <div class="m2" style="--pos:80%"><span class="m2name">immigration</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+      <div class="m2" style="--pos:20%"><span class="m2name">trade</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+    </div>
+  </section>
+
+  <!-- 38. war & interwar: great aberration -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; interwar</p>
+    <h2 class="headline">War &amp; Interwar Period: Great Aberration</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Before WWI, as the UK embraced free trade, it began to restrict immigration.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">WWI happened, and both trade and immigration shut down.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Great Depression leads to autarky era.</span></div>
+    </div>
+    <div class="meters2">
+      <div class="m2" style="--pos:80%"><span class="m2name">immigration</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+      <div class="m2" style="--pos:80%"><span class="m2name">trade</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+    </div>
+  </section>
+
+  <!-- 39. postwar era -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; postwar</p>
+    <h2 class="headline">Postwar Era</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The Free Trade Era begins in postwar institutions and engineering.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Immigration is restricted around the world.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Refugee crisis is resolved, but beyond that, immigration is restricted.</span></div>
+    </div>
+    <div class="meters2">
+      <div class="m2" style="--pos:20%"><span class="m2name">immigration</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+      <div class="m2" style="--pos:80%"><span class="m2name">trade</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+    </div>
+  </section>
+
+  <!-- 40. late postwar era -->
+  <section class="s ed rust">
+    <p class="eyebrow">immigration &nbsp;·&nbsp; late postwar</p>
+    <h2 class="headline">Late Postwar Era</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Trade continues to expand.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Immigration only expands slightly.</span></div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Export-oriented developing states</b> use nontariff barriers and currency manipulation to limit trade.</span></div>
+      <div class="conseq">
+        <div class="f"><span class="c"></span><span class="t">These exporting states restrict immigration.</span></div>
+      </div>
+      <div class="f"><span class="dot"></span><span class="t"><b>Rentier states</b> favor free trade.</span></div>
+      <div class="conseq">
+        <div class="f"><span class="c"></span><span class="t">These dramatically restrict immigration.</span></div>
+      </div>
+    </div>
+    <div class="meters2">
+      <div class="m2" style="--pos:20%"><span class="m2name">immigration</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+      <div class="m2" style="--pos:70%"><span class="m2name">trade</span><span class="m2l">closed</span><span class="m2r">open</span><span class="m2track"></span><i></i></div>
+    </div>
+  </section>
+
+  <!-- 41. finding -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">research</p>
+    <h2 style="color:#f2efe9;font-size:64px;max-width:1500px;line-height:1.2">Across all eras, there is a statistically significant inverse relationship between trade and immigration.</h2>
+  </section>
+
+  <!-- 42. closing quote -->
+  <section class="s quote amber">
+    <div class="mark">&ldquo;</div>
+    <p>&ldquo;Either poor countries will become richer, or poor people will move to rich countries.&rdquo;</p>
+    <p class="att">Branko Milanovic</p>
+  </section>
+
+  </div></div>
+
+<!-- Review-only navigation. The teaching original is unchanged. -->
+<script src="../../deck-player.js"></script>
+</body>
+</html>

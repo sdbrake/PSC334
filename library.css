@@ -1,0 +1,102 @@
+/* THEME: change these values to restyle every course, not each lecture.
+   Decks retain their own styling inside the presentation frame. */
+:root {
+  --paper: #f2efe9;
+  --ink: #1f2933;
+  --navy: #182030;
+  --brass: #d0b67b;
+  --muted: #606873;
+  --line: #d4d0c8;
+  --sidebar-width: 292px;
+  --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: "Avenir Next", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--sans); display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: 100dvh; }
+button { font: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+button:focus-visible, a:focus-visible { outline: 3px solid #a87523; outline-offset: 4px; }
+.sidebar button:focus-visible { outline-color: var(--brass); outline-offset: -3px; }
+.skip-link { position: fixed; top: -80px; left: 16px; padding: 12px; background: white; z-index: 10; }
+.skip-link:focus { top: 12px; }
+.eyebrow { margin: 0 0 14px; font-size: 11px; letter-spacing: .18em; font-weight: 650; text-transform: uppercase; }
+.sidebar { height: 100dvh; position: sticky; top: 0; display: flex; flex-direction: column; background: var(--navy); color: var(--paper); }
+.course-heading { padding: 35px 28px 25px; }
+.course-heading .eyebrow { color: var(--brass); }
+h1 { font-family: var(--serif); font-size: 29px; font-weight: 500; line-height: 1.14; margin: 0; }
+.course-subtitle { color: #b9c0cb; font-size: 13px; margin: 16px 0 0; }
+#lecture-navigation { overflow-y: auto; flex: 1; padding: 0 14px 16px; scrollbar-width: thin; scrollbar-color: #596170 transparent; }
+.index-heading { display: flex; justify-content: space-between; margin: 0 14px 10px; padding-top: 17px; border-top: 1px solid #384151; font-size: 10px; letter-spacing: .16em; color: #b9c0cb; }
+ol { list-style: none; padding: 0; margin: 0; }
+.lecture-item { display: grid; grid-template-columns: 25px 1fr; align-items: baseline; gap: 10px; text-align: left; width: 100%; background: transparent; border: 0; border-left: 2px solid transparent; border-radius: 2px; padding: 10px 12px; color: var(--paper); min-height: 44px; }
+.lecture-item:not(:disabled):hover { background: #252f41; }
+.lecture-item[aria-current="true"] { background: #303949; border-left-color: var(--brass); }
+.lecture-index { font-size: 11px; color: #b9c0cb; font-variant-numeric: tabular-nums; }
+.lecture-label { display: block; font-size: 13px; line-height: 1.35; }
+.coming-soon { font-size: 10px; display: block; color: #b9c0cb; margin-top: 3px; }
+.lecture-item:disabled { color: #b9c0cb; }
+.sidebar-footer { margin: 0 28px; padding: 17px 0 20px; border-top: 1px solid #384151; color: var(--brass); font-size: 9px; letter-spacing: .16em; }
+.sidebar-footer span { display: block; margin-top: 6px; color: #b9c0cb; letter-spacing: .02em; font-size: 11px; }
+.menu-toggle { display: none; }
+main { min-width: 0; min-height: 100dvh; padding: 35px 38px 20px; display: flex; flex-direction: column; }
+.lecture-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.lecture-heading .eyebrow { color: var(--muted); margin-bottom: 9px; }
+h2 { font: 500 clamp(23px, 2.4vw, 35px)/1.15 var(--serif); margin: 0; }
+.quiet-button { flex-shrink: 0; padding: 10px 0 10px 12px; min-height: 44px; border: 0; color: var(--ink); background: transparent; font-size: 12px; }
+.quiet-button span { font-size: 20px; margin-left: 9px; vertical-align: middle; }
+#presentation { min-height: 0; flex: 1; display: flex; flex-direction: column; }
+.stage-area { flex: 1; min-height: 0; display: grid; place-items: center; padding: 24px 0; }
+#slide-shell { width: 100%; aspect-ratio: 16 / 9; position: relative; background: #e7e3dc; outline: 1px solid #d4d0c8; box-shadow: 0 8px 25px #1820300c; }
+iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+[hidden] { display: none !important; }
+#viewer-message { position: absolute; inset: 0; margin: 0; display: grid; place-content: center; text-align: center; padding: 30px; color: var(--muted); }
+.controls { display: grid; grid-template-columns: 1fr minmax(100px, 190px) 1fr; align-items: center; gap: 22px; padding: 0 0 20px; }
+.nav-button { background: transparent; border: 1px solid #b6b5b2; padding: 10px 17px; border-radius: 3px; color: var(--navy); font-size: 13px; min-height: 44px; justify-self: start; }
+.nav-button:not(:disabled):hover { background: #e4e0d8; border-color: var(--navy); }
+.nav-button:disabled { color: #737780; border-color: #d1cfc9; }
+.nav-button span { padding: 0 5px; }
+#next { justify-self: end; }
+.position { text-align: center; }
+#slide-count { font-size: 12px; margin: 0 0 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.progress-track { height: 2px; background: var(--line); }
+#progress-fill { height: 100%; width: 0; background: #91712f; }
+.reader-footer { border-top: 1px solid var(--line); padding-top: 17px; display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; }
+.exit-fullscreen { display: none; }
+#presentation:fullscreen, .focus-mode #presentation { background: var(--paper); padding: 45px 35px 20px; }
+#presentation:fullscreen .exit-fullscreen, .focus-mode .exit-fullscreen { display: block; position: absolute; top: 4px; right: 35px; }
+body.focus-mode { overflow: hidden; }
+.focus-mode #presentation { position: fixed; inset: 0; z-index: 20; }
+/* Reserve space for the exit button, stage padding and navigation bar. */
+.focus-mode #slide-shell, #presentation:fullscreen #slide-shell { max-width: calc((100dvh - 190px) * 16 / 9); }
+@media (min-width: 801px) {
+  #slide-shell { max-width: calc((100dvh - 250px) * 16 / 9); }
+}
+@media (max-width: 1100px) and (min-width: 801px) {
+  :root { --sidebar-width: 250px; }
+  main { padding: 28px 24px 18px; }
+  .course-heading { padding: 28px 24px 24px; }
+  h1 { font-size: 26px; }
+  .reader-footer { flex-direction: column; gap: 5px; }
+}
+@media (max-width: 800px) {
+  body { display: block; }
+  .sidebar { height: auto; position: relative; }
+  .course-heading { padding: 20px 22px 14px; }
+  .course-heading .eyebrow { margin-bottom: 8px; }
+  h1 { font-size: 25px; }
+  .course-subtitle { margin-top: 8px; }
+  .menu-toggle { display: flex; justify-content: space-between; width: 100%; min-height: 44px; padding: 12px 22px; color: var(--paper); background: #252f41; border: 0; text-align: left; }
+  #lecture-navigation { display: none; max-height: 48dvh; padding-top: 15px; }
+  .sidebar.menu-open #lecture-navigation { display: block; }
+  .sidebar-footer { display: none; }
+  main { padding: 24px 18px 18px; min-height: auto; }
+  .lecture-heading { gap: 10px; padding-bottom: 18px; }
+  .lecture-heading h2 { font-size: 25px; }
+  .stage-area { padding: 22px 0; }
+  .controls { gap: 12px; grid-template-columns: 1fr 95px 1fr; }
+  .nav-button { padding: 8px 10px; font-size: 12px; }
+  .nav-button span { padding: 0; }
+  .reader-footer { flex-direction: column; line-height: 1.5; gap: 4px; }
+  .quiet-button { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }

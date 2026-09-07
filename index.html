@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Course Library</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="library.css">
+  <script src="course.js" defer></script>
+  <script src="library.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to presentation</a>
+  <aside class="sidebar" aria-label="Course lectures">
+    <header class="course-heading">
+      <p class="eyebrow" id="course-code"></p>
+      <h1 id="course-title"></h1>
+      <p class="course-subtitle" id="course-subtitle"></p>
+    </header>
+    <button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="lecture-navigation">Lectures <span aria-hidden="true">☰</span></button>
+    <nav id="lecture-navigation" aria-label="Lectures">
+      <div class="index-heading"><span>LECTURES</span><span id="lecture-total"></span></div>
+      <ol id="lecture-list"></ol>
+    </nav>
+    <footer class="sidebar-footer">THE CHARTROOM <span>Course library</span></footer>
+  </aside>
+  <main id="main" tabindex="-1">
+    <header class="lecture-heading">
+      <div><p class="eyebrow" id="lecture-number">LECTURE REVIEW</p><h2 id="lecture-title">Choose a lecture</h2></div>
+      <button id="fullscreen" class="quiet-button" disabled>Full screen <span aria-hidden="true">⛶</span></button>
+    </header>
+    <section id="presentation" aria-label="Presentation and controls">
+      <button id="exit-fullscreen" class="quiet-button exit-fullscreen">Exit full screen <span aria-hidden="true">×</span></button>
+      <div class="stage-area">
+        <div id="slide-shell">
+          <iframe id="deck" title="Lecture slides" hidden></iframe>
+          <p id="viewer-message" role="status">Choose an available lecture to begin.</p>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="previous" class="nav-button" disabled><span aria-hidden="true">←</span> Previous</button>
+        <div class="position"><p id="slide-count" role="status" aria-live="polite">No lecture selected</p><div class="progress-track"><div id="progress-fill"></div></div></div>
+        <button id="next" class="nav-button" disabled>Next <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+    <footer class="reader-footer"><span>Use ← and → to move through the slides.</span><span>Choosing a lecture starts it from the beginning.</span></footer>
+    <noscript>This lecture library needs JavaScript enabled to display slides.</noscript>
+  </main>
+</body>
+</html>

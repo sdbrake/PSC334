@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Rise of the WTO System</title>
+<style>
+  :root{
+    --paper:#f2efe9; --paper2:#e6e2d9; --ink:#1f2933; --muted:#77808c;
+    --olive:#2f7d5b; --rust:#c1502f; --amber:#b07d2b; --violet:#4a6fa5; --navy:#182030;
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);overflow:hidden}
+  #stage{position:fixed;inset:0}
+  #canvas{width:1920px;height:1080px;transform-origin:0 0;position:relative;background:var(--paper);color:var(--ink)}
+  .s{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s ease;display:flex;flex-direction:column}
+  .s.on{opacity:1;pointer-events:auto}
+  .eyebrow{font-family:var(--sans);font-size:26px;letter-spacing:.32em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+  .headline{font-family:var(--serif);font-weight:600;line-height:1.04}
+  .rail{display:grid;gap:24px}
+  .rail .f{display:flex;gap:24px;align-items:baseline}
+  .rail .dot{flex:none;width:14px;height:14px;border-radius:50%;margin-top:14px}
+  .rail .t{font-size:42px;line-height:1.32}
+  .rail .t b{font-weight:600}
+  .no{position:absolute;right:150px;top:84px;font-family:var(--serif);font-size:120px;line-height:1;color:var(--paper2)}
+  .state{position:absolute;right:170px;top:110px;font-family:var(--sans);font-size:24px;
+    letter-spacing:.26em;text-transform:uppercase;font-weight:700;padding:12px 26px;border-radius:999px}
+  .state.open{color:#245f46;background:rgba(47,125,91,.2)}
+  .state.closed{color:#9a3d20;background:rgba(193,80,47,.16)}
+  .meter{position:absolute;left:170px;right:170px;bottom:40px;height:64px}
+  .meter .ml,.meter .mr{position:absolute;top:0;font-size:22px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+  .meter .ml{left:0}.meter .mr{right:0}
+  .meter .track{position:absolute;top:42px;left:10px;right:10px;height:5px;border-radius:999px;
+    background:linear-gradient(to right,var(--rust) 0%,#c0a173 45%,var(--olive) 100%);opacity:.55}
+  .meter i{position:absolute;top:33px;left:var(--pos,50%);width:22px;height:22px;border-radius:50%;
+    background:var(--ink);transform:translateX(-50%);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+  .cover{align-items:center;justify-content:center;text-align:center;background:var(--navy);color:var(--paper)}
+  .cover .eyebrow{color:#b8ab8c}
+  .cover h1{font-size:150px;letter-spacing:.005em;line-height:.96;margin:30px 0 8px}
+  .ed{padding:150px 170px 170px}
+  .ed .headline{font-size:92px;margin-top:16px}
+  .ed .rail{margin-top:64px}
+  .ed .rail .f{padding-bottom:20px;border-bottom:1px solid rgba(38,48,62,.15)}
+  .ed .rail .f:last-child{border-bottom:none}
+  /* lens */
+  .lens{align-items:center;justify-content:center;text-align:center;padding:0 170px}
+  .lens .axis{position:relative;width:100%;max-width:1450px;height:98px;margin:84px auto 0}
+  .lens .axis .atrack{position:absolute;left:0;right:0;top:56px;height:8px;border-radius:999px;background:linear-gradient(to right,var(--rust),var(--olive));opacity:.5}
+  .lens .ends{position:absolute;left:0;right:0;top:0;height:52px;font-family:var(--sans);font-weight:700;font-size:30px;letter-spacing:.22em;text-transform:uppercase}
+  .lens .ends .cl{position:absolute;left:0;color:var(--rust)}.lens .ends .op{position:absolute;right:0;color:var(--olive)}
+  .lens .poles{display:flex;gap:56px;justify-content:center;margin-top:64px}
+  .lens .pole{flex:1;max-width:560px;padding:44px 48px;border-radius:24px;font-family:var(--serif);font-size:60px;font-weight:600}
+  .lens .pole.cl{background:rgba(193,80,47,.1);color:var(--rust)}
+  .lens .pole.op{background:rgba(47,125,91,.12);color:#245f46}
+  .inter{align-items:center;justify-content:center;text-align:center}
+  .navy{background:var(--navy);color:var(--paper)}
+  .warimg{background-size:cover;background-position:center}
+  .warimg.lightimg .eyebrow,.warimg.lightimg h2{text-shadow:0 2px 14px rgba(24,32,48,.85),0 0 4px rgba(24,32,48,.55)}
+  .inter h2{font-family:var(--serif);font-size:160px;font-weight:600;line-height:1.04}
+  .quote{align-items:center;justify-content:center;text-align:center;padding:0 220px}
+  .quote .mark{font-family:var(--serif);font-size:190px;line-height:0;color:var(--amber)}
+  .quote p{font-family:var(--serif);font-style:italic;font-size:64px;line-height:1.35}
+  .quote .att{font-family:var(--sans);font-size:26px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:48px}
+  .cards{justify-content:center}
+  .cards .chead{text-align:center;padding:64px 170px 24px}
+  .cards .chead .headline{font-size:56px;margin-top:10px}
+  .cards .inner{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:56px;padding:30px 170px 110px;align-content:center}
+  .card{background:#fff8ec;border:1px solid rgba(38,48,62,.12);border-radius:26px;padding:56px 54px;
+    display:flex;flex-direction:column;justify-content:center;box-shadow:0 18px 50px rgba(38,48,62,.07)}
+  .card h3{font-family:var(--serif);font-size:54px;font-weight:600;margin:12px 0 22px}
+  .card p{font-size:34px;line-height:1.5}
+  .cards .eyebrow{margin:0 0 12px}
+  .olive .eyebrow,.olive .rail .dot{color:var(--olive)} .olive .rail .dot{background:var(--olive)}
+  .rust .eyebrow,.rust .rail .dot{color:var(--rust)} .rust .rail .dot{background:var(--rust)}
+  .amber .eyebrow,.amber .rail .dot{color:var(--amber)} .amber .rail .dot{background:var(--amber)}
+  .violet .eyebrow,.violet .rail .dot{color:var(--violet)} .violet .rail .dot{background:var(--violet)}
+  #progress{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(38,48,62,.08);z-index:5}
+  #barfill{height:100%;width:0;background:var(--navy)}
+  @media (prefers-reduced-motion:reduce){.s{transition:none}}
+</style>
+</head>
+<body>
+<div id="progress"><div id="barfill"></div></div>
+<div id="stage"><div id="canvas">
+
+  <section class="s cover">
+    <h1>The Rise of the WTO System</h1>
+  </section>
+
+  <section class="s lens">
+    <p class="eyebrow">spectrum</p>
+    <h2 class="headline" style="font-size:96px">Open trade versus closed trade</h2>
+    <div class="axis">
+      <div class="atrack"></div>
+      <div class="ends"><span class="cl">closed</span><span class="op">open</span></div>
+    </div>
+  </section>
+
+    <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/tech.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is made possible by</p>
+      <h2 style="color:var(--paper)">TECHNOLOGY</h2>
+  </section>
+
+      <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/politics.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is made possible by</p>
+      <h2 style="color:var(--paper)">POLITICS</h2>
+  </section>
+
+        <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/gold.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is made possible by</p>
+      <h2 style="color:var(--paper)">GOLD</h2>
+  </section>
+
+          <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/brit.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is made possible by</p>
+      <h2 style="color:var(--paper)">THE BRITISH EMPIRE</h2>
+  </section>
+
+              <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/ricardo.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is explained by</p>
+      <h2 style="color:var(--paper)">DAVID RICARDO</h2>
+  </section>
+
+  <section class="s ed olive">
+            <p class="eyebrow">the first open era &nbsp;·&nbsp; the nineteenth century</p>
+    <h2 class="headline">Trade opens, worldwide</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Technology makes trade possible.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Bilateral treaties; an international monetary system.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Britain embraces free trade.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">1860: the Cobden&ndash;Chevalier Treaty.</span></div>
+    </div>
+    <div class="meter" style="--pos:80%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+  <section class="s ed olive">
+            <p class="eyebrow">Globalism 1.0 &nbsp;·&nbsp; Trade Among Empires</p>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Currencies tethered to gold.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Trade grows.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Opening empires of trade making money off of each other.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Who's colony? Who cares?.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">War seems impossible.</span></div>
+          </div>
+    <p class="sub" style="margin-top:30px;font-size:26px;line-height:1.45;max-width:1500px">&ldquo;But the truth that economic force always in the long run outweighs physical or military force is illustrated by the simple fact of the universal use of money&mdash;the fact that the use of money is not a thing which we choose or can shake off, but a thing imposed by the operation of forces stronger than our volition, stronger than the tyranny of the cruellest tyrant who ever reigned by blood and iron.&rdquo;<br><span style="font-family:var(--sans);font-size:19px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:6px;display:inline-block">&mdash; Norman Angell, The Great Illusion (1909)</span></p>
+    <div class="meter" style="--pos:86%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+  <section class="s inter warimg" style="background:linear-gradient(rgba(24,32,48,.62),rgba(24,32,48,.62)),url('images/wwi.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">1914&ndash;1918</p>
+        <h2 style="color:var(--paper)">WWI</h2>
+  </section>
+
+  <section class="s ed rust">
+            <p class="eyebrow">the great war &nbsp;·&nbsp; 1914&ndash;18</p>
+    <h2 class="headline">War snaps the system shut</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Governments abandon the gold standard.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">They abandon free trade.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Germany blockaded &mdash; the trade system collapses.</span></div>
+    </div>
+    <div class="meter" style="--pos:6%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+  <section class="s ed rust">
+            <p class="eyebrow">after the war</p>
+    <h2 class="headline">No one reopens it</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The US returns to protection.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Europe owes debts (winners) or reparations (losers).</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The stock market collapses.</span></div>
+    </div>
+    <div class="meter" style="--pos:30%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+
+          <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/depression.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is disrupted by</p>
+      <h2 style="color:var(--paper)">THE GREAT DEPRESSION</h2>
+  </section>
+
+           <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/tariff.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is disrupted by</p>
+      <h2 style="color:var(--paper)">GLOBAL TARIFF RACE</h2>
+  </section>
+
+             <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/merc.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is disrupted by</p>
+      <h2 style="color:var(--paper)">MERCANTILSM 2</h2>
+  </section>
+
+               <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/colonial.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">Trade is disrupted by</p>
+      <h2 style="color:var(--paper)">COLONIAL WARS</h2>
+  </section>
+
+
+  <section class="s ed rust">
+            <p class="eyebrow">the depression &nbsp;·&nbsp; 1930s</p>
+    <h2 class="headline">A world of closed doors</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">A worldwide tariff race.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Worldwide mercantilism.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Mercantilism becomes colonial war.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Depression becomes anger.</span></div>
+    </div>
+    <div class="meter" style="--pos:12%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+  <section class="s inter warimg" style="background:linear-gradient(rgba(24,32,48,.62),rgba(24,32,48,.62)),url('images/wwii.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">1939&ndash;1945</p>
+    <h2 style="color:var(--paper)">WWII</h2>
+  </section>
+
+  <section class="s ed rust">
+            <p class="eyebrow">WWII &nbsp;·&nbsp; A War of Closed Blocs</p>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Japan tries to create a trade bloc.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Germany tries to steal land for growth.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Italy tries to build a mediterranean empire.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The Soviets try to end capitalism.</span></div>
+    </div>
+    <div class="meter" style="--pos:12%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+            <section class="s inter warimg lightimg" style="background:linear-gradient(rgba(24,32,48,.34),rgba(24,32,48,.34)),url('images/trade.jpg') center/cover no-repeat;">
+    <p class="eyebrow" style="color:#d8cbb0">the US decides that the lesson of the Second World War is</p>
+      <h2 style="color:var(--paper)">Tariffs = Wars</h2>
+  </section>
+
+  <section class="s ed amber">
+            <p class="eyebrow">Globalization 2.0 &nbsp;·&nbsp; Bretton Woods, 1944</p>
+    <h2 class="headline">Reopen &mdash; with rules</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The liberal system, back up &mdash; but with changes.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Governments play an active role.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Social safety nets for the losers of trade.</span></div>
+    </div>
+    <div class="meter" style="--pos:76%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+  <section class="s quote amber">
+    <div class="mark">&ldquo;</div>
+    <p>&ldquo;do away with the economic evils &mdash; the competitive devaluation and destructive impediments to trade &mdash; which preceded the present war.&rdquo;</p>
+    <p class="att">Henry Morgenthau &middot; US Treasury Secretary</p>
+  </section>
+
+  <section class="s cards amber">
+    <div class="chead">
+      <p class="eyebrow" style="color:var(--amber)">bretton woods institutions</p>
+    </div>
+    <div class="inner">
+      <div class="card"><p class="eyebrow" style="color:var(--amber)">the IMF</p><h3>Lender of last resort</h3><p>When states can&rsquo;t afford trade deficits, they borrow from the IMF... with conditions.</p></div>
+      <div class="card"><p class="eyebrow" style="color:var(--amber)">the World Bank</p><h3>Funds development</h3><p>Lends to developing states money for projects.</p></div>
+    </div>
+  </section>
+
+  <section class="s ed violet">
+            <p class="eyebrow">the rules &nbsp;·&nbsp; 1994</p>
+    <h2 class="headline">From GATT to the WTO</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">1947: the GATT begins cutting tariffs.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">1994: it becomes the WTO.</span></div>
+    </div>
+    <div class="meter" style="--pos:90%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+  <section class="s cards violet">
+    <div class="chead">
+      <p class="eyebrow" style="color:var(--violet)">the WTO &nbsp;&middot;&nbsp; 1994</p>
+      <h2 class="headline">Two founding principles</h2>
+    </div>
+    <div class="inner">
+      <div class="card"><p class="eyebrow" style="color:var(--violet)">principle I</p><h3>Market Liberalism</h3><p>Open trade is a positive-sum game; members commit to the free movement of goods without tariffs.</p></div>
+      <div class="card"><p class="eyebrow" style="color:var(--violet)">principle II</p><h3>Nondiscrimination</h3><p>Every member trades on the same footing as every other.</p></div>
+    </div>
+  </section>
+
+  <section class="s ed violet">
+            <p class="eyebrow">It's not like we are being unreasonable...</p>
+    <h2 class="headline">exceptions to the rule</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Free-trade areas &amp; customs unions &mdash; the EU, NAFTA.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Generalized preferences for developing countries.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">National treatment.</span></div>
+    </div>
+    <div class="meter" style="--pos:88%"><i></i><span class="ml">closed</span><span class="mr">open</span><span class="track"></span></div>
+  </section>
+
+</div></div>
+
+<!-- Review-only navigation. The teaching original is unchanged. -->
+<script src="../../deck-player.js"></script>
+</body>
+</html>

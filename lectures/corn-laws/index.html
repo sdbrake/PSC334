@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examining the Corn Laws</title>
+<style>
+  :root{
+    --paper:#f2efe9; --paper2:#e6e2d9; --ink:#1f2933; --muted:#77808c;
+    --olive:#2f7d5b; --rust:#c1502f; --amber:#b07d2b; --violet:#4a6fa5; --navy:#182030;
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);overflow:hidden}
+  #stage{position:fixed;inset:0}
+  #canvas{width:1920px;height:1080px;transform-origin:0 0;position:relative;background:var(--paper);color:var(--ink)}
+  .s{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s ease;display:flex;flex-direction:column}
+  .s.on{opacity:1;pointer-events:auto}
+  .eyebrow{font-family:var(--sans);font-size:26px;letter-spacing:.32em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+  .headline{font-family:var(--serif);font-weight:600;line-height:1.04}
+  .rail{display:grid;gap:24px}
+  .rail .f{display:flex;gap:24px;align-items:baseline}
+  .rail .dot{flex:none;width:14px;height:14px;border-radius:50%;margin-top:14px}
+  .rail .t{font-size:42px;line-height:1.32}
+  .rail .t b{font-weight:600}
+  .conseq{margin-left:50px;margin-top:2px;display:grid;gap:14px}
+  .ed .rail .conseq .f{border-bottom:none;padding-bottom:0;gap:18px}
+  .conseq .c{flex:none;width:10px;height:10px;border-radius:50%;margin-top:14px;background:var(--muted)}
+  .conseq .t{font-size:32px}
+  .rail > .f{opacity:0;transform:translateY(10px);transition:opacity .28s ease,transform .28s ease}
+  .rail > .f.on{opacity:1;transform:none}
+  .rail > .conseq{opacity:0;transform:translateY(10px);transition:opacity .28s ease,transform .28s ease}
+  .rail > .conseq.vis{opacity:1;transform:none}
+  .twocol{justify-content:center;text-align:center;padding:0 150px}
+  .twocol .headline{margin-top:14px}
+  .twocol .halves{display:grid;grid-template-columns:1fr 1fr;gap:80px;width:100%;max-width:1560px;margin-top:52px;text-align:left}
+  .twocol ul{list-style:none;display:grid;gap:20px;padding:0}
+  .twocol li{font-size:30px;line-height:1.36;display:flex;gap:16px;align-items:baseline}
+  .twocol li::before{content:'';flex:none;width:11px;height:11px;border-radius:50%;background:var(--muted);display:inline-block;margin-top:12px}
+  .twocol .more{margin-top:44px;font-family:var(--serif);font-style:italic;color:var(--muted);font-size:40px}
+  .twocol .half h4{font-family:var(--serif);font-size:46px;margin-bottom:22px}
+  .twocol .half.proto li::before{background:var(--rust)}
+  .twocol .half.proto h4{color:var(--rust)}
+  .twocol .half.free li::before{background:var(--olive)}
+  .twocol .half.free h4{color:var(--olive)}
+  .meter{position:absolute;left:170px;right:170px;bottom:40px;height:64px}
+  .meter .ml,.meter .mr{position:absolute;top:0;font-size:22px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+  .meter .ml{left:0}.meter .mr{right:0}
+  .meter .track{position:absolute;top:42px;left:10px;right:10px;height:5px;border-radius:999px;
+    background:linear-gradient(to right,var(--rust) 0%,#c0a173 45%,var(--olive) 100%);opacity:.55}
+  .meter i{position:absolute;top:33px;left:var(--pos,50%);width:22px;height:22px;border-radius:50%;
+    background:var(--ink);transform:translateX(-50%);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+  .cover{align-items:center;justify-content:center;text-align:center;background:var(--navy);color:var(--paper)}
+  .cover .eyebrow{color:#b8ab8c}
+  .cover h1{font-size:128px;letter-spacing:.005em;line-height:.98;margin:30px 0 8px}
+  .school{align-items:center;justify-content:center;text-align:center;padding:0 170px;background:var(--navy);color:var(--paper)}
+  .school .eyebrow{color:#b8ab8c}
+  .school h2{font-family:var(--serif);font-weight:600;font-size:132px;line-height:1.02}
+  .school .acc{width:120px;height:8px;border-radius:999px;margin:38px auto 0}
+  .ed{padding:150px 170px 170px}
+  .ed .headline{font-size:82px;margin-top:16px}
+  .ed .rail{margin-top:56px}
+  .ed .rail .f{padding-bottom:20px;border-bottom:1px solid rgba(38,48,62,.15)}
+  .ed .rail .f:last-child{border-bottom:none}
+  .inter{align-items:center;justify-content:center;text-align:center}
+  .navy{background:var(--navy);color:var(--paper)}
+  .inter h2{font-family:var(--serif);font-size:150px;font-weight:600;line-height:1.04}
+  .quote{align-items:center;justify-content:center;text-align:center;padding:0 220px}
+  .quote .mark{font-family:var(--serif);font-size:190px;line-height:0;color:var(--amber)}
+  .quote p{font-family:var(--serif);font-style:italic;font-size:60px;line-height:1.35}
+  .duo{align-items:center;justify-content:center;text-align:center;padding:110px 170px}
+  .duo .headline{font-size:84px;margin-top:12px}
+  .duo .figs{display:flex;gap:110px;justify-content:center;align-items:flex-end;margin-top:70px}
+  .duo figure{display:flex;flex-direction:column;align-items:center}
+  .duo img{height:600px;width:auto;object-fit:contain;border-radius:16px;box-shadow:0 26px 70px rgba(24,32,48,.22)}
+  .duo figcaption{font-family:var(--serif);font-size:44px;margin-top:28px}
+  .duo figcaption small{display:block;font-family:var(--sans);font-size:22px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .foot{position:absolute;left:170px;right:170px;bottom:52px;font-family:var(--serif);font-style:italic;font-size:34px;color:var(--muted);text-align:center}
+  .olive .eyebrow,.olive .rail .dot{color:var(--olive)} .olive .rail .dot{background:var(--olive)}
+  .rust .eyebrow,.rust .rail .dot{color:var(--rust)} .rust .rail .dot{background:var(--rust)}
+  .amber .eyebrow,.amber .rail .dot{color:var(--amber)} .amber .rail .dot{background:var(--amber)}
+  .violet .eyebrow,.violet .rail .dot{color:var(--violet)} .violet .rail .dot{background:var(--violet)}
+  #progress{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(38,48,62,.08);z-index:5}
+  #barfill{height:100%;width:0;background:var(--navy)}
+  @media (prefers-reduced-motion:reduce){.s,.rail>.f{transition:none}}
+</style>
+</head>
+<body>
+<div id="progress"><div id="barfill"></div></div>
+<div id="stage"><div id="canvas">
+
+  <!-- 1. cover -->
+  <section class="s cover">
+    <h1>Examining the Corn Laws</h1>
+  </section>
+
+  <!-- ======================= SECTION: THE BACKGROUND ======================= -->
+  <section class="s school">
+    <p class="eyebrow">part one</p>
+    <h2>The Background</h2>
+    <div class="acc" style="background:var(--olive)"></div>
+  </section>
+
+  <!-- 2. Why return / corn laws -->
+  <section class="s ed olive">
+    <p class="eyebrow">the background</p>
+    <h2 class="headline" style="color:var(--olive)">Why return to the corn Laws?</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Their repeal was the most important liberalization in history</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Their process would become a pattern</span></div>
+      <div class="f"><span class="dot"></span><span class="t">It is a good case study for interests and trade</span></div>
+    </div>
+  </section>
+
+  <!-- 3. The Corn Laws -->
+  <section class="s ed violet">
+    <p class="eyebrow">the background</p>
+    <h2 class="headline" style="color:var(--violet)">The Corn Laws</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">&ldquo;Corn&rdquo; means wheat here.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Britain had corn growers, but not enough to feed the whole island. They wanted food security.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Enacted to protect the wheat market from price shocks caused by the Napoleonic Wars.</span></div>
+      <div class="f"><span class="dot"></span><span class="t">It allowed free entry of wheat when the price was above a threshold, and prevented it when the price was below a threshold.</span></div>
+    </div>
+  </section>
+
+  <!-- 4. pull-quote -->
+  <section class="s quote amber">
+    <div class="mark">&ldquo;</div>
+    <p>&ldquo;to prevent grain from being at any time, either so dear that the poor cannot subsist, or so cheap that the farmer cannot live by growing of it.&rdquo;</p>
+  </section>
+
+  <!-- 5. Anti-Corn Law League -->
+  <section class="s ed rust">
+    <p class="eyebrow">the background</p>
+    <h2 class="headline" style="color:var(--rust)">The Anti-Corn Law League</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Founded in London in 1836</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Led by manufacturers and professionals in the export industry</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Extremely well funded and organized</span></div>
+    </div>
+  </section>
+
+  <!-- 6. Cobden & Bright portraits -->
+  <section class="s duo">
+    <p class="eyebrow">the leaders</p>
+    <h2 class="headline" style="color:var(--navy)">Richard Cobden &amp; John Bright</h2>
+    <div class="figs">
+      <figure><img src="images/cobden.jpg" alt="Richard Cobden"><figcaption>Richard Cobden<small>&copy; Elliott &amp; Fry, 1863</small></figcaption></figure>
+      <figure><img src="images/bright.jpg" alt="John Bright"><figcaption>John Bright<small>1882</small></figcaption></figure>
+    </div>
+  </section>
+
+  <!-- 7. The Issues -->
+  <section class="s ed olive">
+    <p class="eyebrow">the background</p>
+    <h2 class="headline" style="color:var(--olive)">The Issues</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">The price of bread was directly connected to the cost of living</span></div>
+      <div class="f"><span class="dot"></span><span class="t">The income of farms was directly connected to the price of grain</span></div>
+      <div class="f"><span class="dot"></span><span class="t">This was the 1800s. The remnants of the feudal system lingered on in the countryside</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Farm income supported the landed aristocracy</span></div>
+    </div>
+  </section>
+
+  <!-- 8. The Interests -->
+  <section class="s ed violet">
+    <p class="eyebrow">the background</p>
+    <h2 class="headline" style="color:var(--violet)">The Interests</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Industrialists</span></div>
+      <div class="f"><span class="dot"></span><span class="t">City Workers</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Landowners</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Farm Workers</span></div>
+    </div>
+    <div class="foot">Who benefits from the Corn laws? Who benefits from repeal?</div>
+  </section>
+
+  <!-- 9. Elite Competition -->
+  <section class="s ed rust">
+    <p class="eyebrow">the background</p>
+    <h2 class="headline" style="color:var(--rust)">Elite Competition</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Landowners vs Industrialists</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Democratization meant each had to appeal to the common people</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Some began to argue for the civil liberty of free trade</span></div>
+    </div>
+  </section>
+
+  <!-- ======================= SECTION: THE DEBATE ========================== -->
+  <section class="s school">
+    <p class="eyebrow">part two</p>
+    <h2>The Debate</h2>
+    <div class="acc" style="background:var(--violet)"></div>
+  </section>
+
+  <!-- 10. Argument One -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">the debate</p>
+    <h2 style="color:#f2efe9">Bread Prices vs Wages</h2>
+  </section>
+
+  <section class="s twocol violet">
+    <p class="eyebrow" style="color:var(--violet)">argument one</p>
+    <h2 class="headline" style="font-size:64px">Bread Prices vs Wages</h2>
+    <div class="halves">
+      <div class="half proto"><h4>Protectionist Arguments</h4><ul>
+        <li>The industrialists thought they could lower wages through repeal: If bread prices were lower, wages would go down and workers could be paid less</li>
+        <li>Foreign monopolies would outsell the local food market, raising prices of food in the long run</li>
+        <li>Agricultural decline would force more workers into industry, lowering industrial wages anyway</li>
+      </ul></div>
+      <div class="half free"><h4>Free Trader Arguments</h4><ul>
+        <li>Free Traders argued that repeal would allow for specialization</li>
+        <li>Specialization would increase trade revenue could increase workers&rsquo; wages</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- Argument Two -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">the debate</p>
+    <h2 style="color:#f2efe9">Class Conflict</h2>
+  </section>
+
+  <section class="s twocol olive">
+    <p class="eyebrow" style="color:var(--olive)">argument two</p>
+    <h2 class="headline" style="font-size:64px">Class Conflict</h2>
+    <div class="halves">
+      <div class="half proto"><h4>Protectionist Argument</h4><ul>
+        <li>Free Traders are trying to enrich the industrialists at the expense of the workers!</li>
+      </ul></div>
+      <div class="half free"><h4>Free Trader Argument</h4><ul>
+        <li>Protectionists are trying to enrich the aristocracy at the expense of the farm laborers!</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- Argument Three -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">the debate</p>
+    <h2 style="color:#f2efe9">The Taxation of Landowners</h2>
+  </section>
+
+  <section class="s twocol rust">
+    <p class="eyebrow" style="color:var(--rust)">argument three</p>
+    <h2 class="headline" style="font-size:64px">The Taxation of Landowners</h2>
+    <div class="halves">
+      <div class="half proto"><h4>Protectionist Argument</h4><ul>
+        <li>Landowners paid disproportionate taxes, they should be protected.</li>
+      </ul></div>
+      <div class="half free"><h4>Free Trader Argument</h4><ul>
+        <li>Land is more valuable than ever, Landowners should actually be taxed more!</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- Argument Four -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">the debate</p>
+    <h2 style="color:#f2efe9">Who Exploits Whom?</h2>
+  </section>
+
+  <section class="s twocol amber">
+    <p class="eyebrow" style="color:var(--amber)">argument four</p>
+    <h2 class="headline" style="font-size:64px">Who Exploits Whom?</h2>
+    <div class="halves">
+      <div class="half proto"><h4>Protectionist Argument</h4><ul>
+        <li>Capitalists take more of the profit from industrial laborers than landowners take from farm laborers.</li>
+        <li>Take away their income to empower poor workers</li>
+      </ul></div>
+      <div class="half free"><h4>Free Trader Argument</h4><ul>
+        <li>Landowners make rents off of poor farmers &ndash; protecting trade doesn&rsquo;t actually help the laborers</li>
+        <li>Take away their income to empower poor farmers</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- Argument Five -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">the debate</p>
+    <h2 style="color:#f2efe9;font-size:104px">National Importance of Agriculture vs Manufacturing</h2>
+  </section>
+
+  <section class="s twocol olive">
+    <p class="eyebrow" style="color:var(--olive)">argument five</p>
+    <h2 class="headline" style="font-size:56px">The National Importance of Agriculture vs Manufacturing</h2>
+    <div class="halves">
+      <div class="half proto"><h4>Protectionist Argument</h4><ul>
+        <li>Agriculture produces food, which is critical to the nation</li>
+        <li>Reliance on foreign food would threaten security</li>
+        <li>Agriculture employs more of the work force</li>
+        <li>Land is the basis of power and wealth</li>
+      </ul></div>
+      <div class="half free"><h4>Free Trader Argument</h4><ul>
+        <li>Agriculture is just a business like any other</li>
+        <li>Industry is connected to progress and growth: we should empower it</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- Argument Six -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">the debate</p>
+    <h2 style="color:#f2efe9">The National Interest</h2>
+  </section>
+
+  <section class="s twocol violet">
+    <p class="eyebrow" style="color:var(--violet)">argument six</p>
+    <h2 class="headline" style="font-size:64px">The National Interest</h2>
+    <div class="halves">
+      <div class="half proto"><h4>Protectionist Argument</h4><ul>
+        <li>Other countries will take advantage of Britain lowering tariffs</li>
+        <li>Self-sufficiency is a matter of national interest</li>
+        <li>The government depends on tariff revenues</li>
+      </ul></div>
+      <div class="half free"><h4>Free Trader Argument</h4><ul>
+        <li>Other nations will probably lower tariffs if Britain does</li>
+        <li>Manufacturing exports could destroy other countries&rsquo; manufacturing sectors</li>
+        <li>Exporters will make so much money that it will make up for it in taxes</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- ======================= SECTION: ISSUE LINKAGE ======================= -->
+  <section class="s school">
+    <p class="eyebrow">part three</p>
+    <h2>Issue Linkage</h2>
+    <div class="acc" style="background:var(--rust)"></div>
+  </section>
+
+  <!-- The Corn Laws reveal a trend -->
+  <section class="s ed rust">
+    <p class="eyebrow">issue linkage</p>
+    <h2 class="headline" style="color:var(--rust)">The Corn Laws reveal a trend</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Agriculture causes lots of trade disputes</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Countries hang on to agricultural tariffs longer than other types</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Farm lobbies usually form influential interest groups.</span></div>
+    </div>
+  </section>
+
+  <!-- Issue Linkage definition -->
+  <section class="s inter navy">
+    <p class="eyebrow" style="color:#b8ab8c">issue linkage</p>
+    <h2 style="color:#f2efe9;font-size:64px;line-height:1.2;max-width:1500px">When problems that affect two different sectors are connected via institutions or negotiation strategy.</h2>
+  </section>
+
+  <!-- Cross-Sector Interests -->
+  <section class="s ed olive">
+    <p class="eyebrow">issue linkage</p>
+    <h2 class="headline" style="color:var(--olive)">Cross-Sector Interests</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Those who demand protection usually have an advantage</span></div>
+      <div class="conseq">
+        <div class="f"><span class="c"></span><span class="t">Collective Action Problem</span></div>
+        <div class="f"><span class="c"></span><span class="t">Institutional bias</span></div>
+        <div class="f"><span class="c"></span><span class="t">Status quo bias</span></div>
+      </div>
+      <div class="f"><span class="dot"></span><span class="t">Smaller groups can combine to counter farmers through linkage</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Example: Industrial and service sectors combine to balance the agricultural sector in EU politics.</span></div>
+    </div>
+  </section>
+
+  <!-- Institutions and Credibility: quote -->
+  <section class="s quote violet">
+    <div class="mark">&ldquo;</div>
+    <p>&ldquo;More quids make it easier to reach agreements in quid pro quo deal making&rdquo;</p>
+    <p class="att">Robert Keohane, 1984</p>
+  </section>
+
+  <!-- Institutions and Credibility: facts -->
+  <section class="s ed violet">
+    <p class="eyebrow">issue linkage</p>
+    <h2 class="headline" style="color:var(--violet)">Institutions and Credibility</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Institutions allow multiple issues to be negotiated at once</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Institutions provide credible long-term linkage</span></div>
+    </div>
+  </section>
+
+  <!-- Evidence -->
+  <section class="s ed amber">
+    <p class="eyebrow">issue linkage</p>
+    <h2 class="headline" style="color:var(--amber)">Evidence</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Over the history of GATT and WTO negotiation rounds, liberalization was more successful when joint negotiation in multiple sectors happened at once</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Institutions with narrow purposes and low levels of institutionalization produced much less liberalization of trade</span></div>
+    </div>
+  </section>
+
+  <!-- How institutions link issues in trade -->
+  <section class="s ed olive">
+    <p class="eyebrow">issue linkage</p>
+    <h2 class="headline" style="color:var(--olive)">How institutions link issues in trade</h2>
+    <div class="rail">
+      <div class="f"><span class="dot"></span><span class="t">Setting the stakes and scope via announcement</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Guiding the process through negotiation procedures and agenda setting</span></div>
+      <div class="f"><span class="dot"></span><span class="t">Determining commitment mechanisms like contracts and monitoring.</span></div>
+    </div>
+  </section>
+
+</div></div>
+
+<!-- Review-only navigation. The teaching original is unchanged. -->
+<script src="../../deck-player.js"></script>
+</body>
+</html>
