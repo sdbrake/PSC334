@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Society-Based Theory — chartroom</title>
+<style>
+
+  /* Chartroom palette. Change these tokens to restyle, not the lecture text. */
+  :root {
+    --paper:#f2efe9; --paper2:#e6e2d9; --ink:#1f2933; --muted:#77808c;
+    --olive:#2f7d5b; --rust:#c1502f; --amber:#b07d2b; --violet:#4a6fa5; --navy:#182030;
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+    --sans:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; }
+  body { background:var(--navy); color:var(--ink); font-family:var(--sans); overflow:hidden; }
+  /* Explicit zero-minimum tracks keep the unscaled canvas from enlarging the grid. */
+  #stage { position:fixed; inset:0; display:grid; grid-template:minmax(0,1fr) / minmax(0,1fr); place-items:center; }
+  #canvas { position:relative; width:1920px; height:1080px; transform-origin:center; background:var(--paper); }
+  .s { position:absolute; inset:0; padding:130px 160px; display:flex; flex-direction:column;
+    background:var(--paper); opacity:0; visibility:hidden; pointer-events:none; transition:opacity .22s ease; }
+  .s.on { opacity:1; visibility:visible; pointer-events:auto; }
+  .headline { font-family:var(--serif); font-size:92px; font-weight:600; line-height:1.09; letter-spacing:-.025em; }
+  .eyebrow { font-size:25px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+  .violet { --hue:var(--violet); } .amber { --hue:var(--amber); }
+  .olive { --hue:var(--olive); } .rust { --hue:var(--rust); }
+  .ed .headline::before { content:""; display:block; width:80px; height:5px; margin-bottom:30px; background:var(--hue); }
+  .navy { background:var(--navy); color:var(--paper); }
+  .cover { justify-content:center; align-items:center; text-align:center; padding:130px 200px; }
+  .cover .headline { font-size:148px; line-height:1.03; max-width:1520px; }
+  .cover.names .headline { max-width:1430px; font-size:134px; }
+  .accent { height:6px; width:130px; background:var(--amber); margin-top:65px; }
+  .rail { display:grid; gap:24px; margin-top:66px; }
+  .f { padding:0 0 26px 34px; border-left:4px solid var(--hue); border-bottom:1px solid rgba(31,41,51,.15); }
+  .f:last-child { border-bottom:none; padding-bottom:0; }
+  .t { font-size:44px; line-height:1.36; }
+  .step { opacity:0; visibility:hidden; transform:translateY(7px); transition:opacity .2s ease,transform .2s ease; }
+  .step.shown { opacity:1; visibility:visible; transform:none; }
+  .f:not(.current) { border-left-color:var(--paper2); }
+  .f.current { border-left-color:var(--hue); }
+  .open { color:var(--olive); } .closed { color:var(--rust); }
+  .questions { padding-top:140px; }
+  .question-pair { display:grid; grid-template-columns:1fr 1fr; gap:64px; margin-top:75px; }
+  .question { font-family:var(--serif); font-size:76px; line-height:1.13; padding:28px 0 42px; border-top:5px solid currentColor; }
+  .implication { margin-top:65px; font-size:43px; line-height:1.42; max-width:1520px; }
+  .examples .rail { margin-top:90px; gap:45px; }
+  .examples .t { font-family:var(--serif); font-size:64px; }
+  .assumptions .headline { font-size:65px; max-width:1530px; }
+  .assumptions .rail { margin-top:56px; gap:25px; }
+  .matrix { padding-top:115px; }
+  .matrix table { border-collapse:collapse; table-layout:fixed; width:100%; margin-top:65px; }
+  .matrix th,.matrix td { text-align:left; vertical-align:middle; }
+  .matrix thead th { padding:0 34px 28px; font-size:32px; letter-spacing:.07em; color:var(--violet); }
+  .matrix thead th:first-child { width:310px; font-size:24px; font-weight:400; color:var(--muted); }
+  .matrix tbody th { padding:42px 20px 42px 0; font-size:34px; font-weight:500; line-height:1.3; }
+  .matrix tbody tr { border-top:1px solid rgba(31,41,51,.2); height:230px; }
+  .matrix td { padding:42px 34px; border-left:1px solid rgba(31,41,51,.15); background:rgba(255,255,255,.25); }
+  .matrix td span { display:block; font-size:36px; line-height:1.4; }
+  .matrix td .ab { color:var(--olive); font-weight:600; margin-bottom:20px; }
+  .matrix td .sc { color:var(--rust); }
+  .countries .t { font-size:49px; }
+  .countries .rail,.results .rail { margin-top:76px; gap:37px; }
+  .results .t { font-size:46px; }
+  .closing .rail { gap:64px; margin-top:88px; }
+  .closing .f:last-child .t { font-family:var(--serif); font-size:68px; line-height:1.24; }
+  .scholar { padding:100px 160px; display:grid; grid-template-columns:380px 1fr; gap:80px; align-items:start; }
+  .scholar .portrait { width:380px; height:460px; border-radius:12px; object-fit:cover; object-position:center top; box-shadow:0 8px 32px rgba(24,32,48,.18); }
+  .scholar .body { padding-top:20px; }
+  .scholar .cite-box { border:2px solid var(--violet); border-radius:10px; padding:40px 48px; margin-bottom:52px; }
+  .scholar .cite-box .cite-label { font-size:18px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--violet); margin-bottom:18px; }
+  .scholar .cite-box .cite-text { font-family:var(--serif); font-size:34px; line-height:1.48; color:var(--ink); }
+  .scholar .takeaway { font-size:44px; line-height:1.42; color:var(--ink); max-width:1200px; }
+  #progress { position:fixed; bottom:0; left:0; right:0; height:4px; background:rgba(119,128,140,.14); z-index:5; }
+  #barfill { height:100%; width:0; background:var(--amber); }
+  @media (prefers-reduced-motion:reduce) { .s,.step { transition:none; transform:none; } }
+  @page { size:1920px 1080px; margin:0; }
+  @media print {
+    body { overflow:visible; background:var(--paper); }
+    #stage { position:static; display:block; }
+    #canvas { transform:none!important; height:auto; }
+    .s { position:relative; height:1080px; break-after:page; }
+    .s,.step { opacity:1!important; visibility:visible!important; transform:none!important; }
+    #progress { display:none; }
+    * { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  }
+
+/* Review copy: reveal steps shown immediately. */
+.step{opacity:1;visibility:visible;transform:none}
+</style>
+</head>
+<body>
+<!-- Teaching version: keyboard navigation, stepwise reveals, independent saved position. -->
+<div id="stage"><div id="canvas">
+  <!-- 01: content retained from original slide 1 -->
+  <section class="s cover navy" data-num="1" data-steps="0">
+    <h1 class="headline">Hecksher-Ohlin model</h1>
+    <div class="accent" aria-hidden="true"></div>
+  </section>
+
+  <!-- 02: content retained from original slide 2 -->
+  <section class="s ed violet " data-num="2" data-steps="4">
+    <h2 class="headline">Hecksher-Ohlin model</h2>
+    <div class="rail">
+      <div class="f step" data-step="0"><span class="t">Comparative advantage arises from differences in factor endowments.</span></div>
+      <div class="f step" data-step="1"><span class="t">Factors: Basic tools of production. Labor, capital, land.</span></div>
+      <div class="f step" data-step="2"><span class="t">Imagine <span class="open">LIBERALIZATION</span> and <span class="closed">PROTECTION</span> as two states of an economy.</span></div>
+      <div class="f step" data-step="3"><span class="t">Winners and Losers of Trade — Rogowski, R. (1989)</span></div>
+    </div>
+  </section>
+
+  <!-- 03: content retained from original slide 3 -->
+  <section class="s cover navy names" data-num="3" data-steps="0">
+    <h2 class="headline">Wolfgang Stolper and Paul Samuelson</h2>
+    <div class="accent" aria-hidden="true"></div>
+  </section>
+
+  <!-- 04: content retained from original slide 4 -->
+  <section class="s questions" data-num="4" data-steps="3">
+    <p class="eyebrow">Wolfgang Stolper and Paul Samuelson</p>
+    <div class="question-pair">
+      <div class="step question closed" data-step="0">Who lobbies for protection?</div>
+      <div class="step question open" data-step="1">Who lobbies for liberalization?</div>
+    </div>
+    <p class="step implication" data-step="2">If we apply the Stolper Samuelson theorem, then, we can see that trade results in urban-rural conflict in two kinds of economies, and class conflict in two other types.</p>
+  </section>
+
+  <!-- 05: content retained from original slide 5 -->
+  <section class="s ed amber examples" data-num="5" data-steps="3">
+    <h2 class="headline">Examples?</h2>
+    <div class="rail">
+      <div class="f step" data-step="0"><span class="t">Cheaper transportation costs?</span></div>
+      <div class="f step" data-step="1"><span class="t">A war or oil embargo?</span></div>
+      <div class="f step" data-step="2"><span class="t">International hegemony?</span></div>
+    </div>
+  </section>
+
+  <!-- 06: content retained from original slide 6 -->
+  <section class="s ed amber assumptions" data-num="6" data-steps="4">
+    <h2 class="headline step" data-step="0">This gets even more interesting if we are willing to grant some assumptions:</h2>
+    <div class="rail">
+      <div class="f step" data-step="1"><span class="t">Beneficiaries of a change will try to continue it.</span></div>
+      <div class="f step" data-step="2"><span class="t">Victims of a change will try and slow or stop it.</span></div>
+      <div class="f step" data-step="3"><span class="t">Being richer is connected to being more politically powerful.</span></div>
+    </div>
+  </section>
+
+  <!-- 07: content retained from original slide 7 -->
+  <section class="s ed matrix violet" data-num="7" data-steps="0">
+    <h2 class="headline" id="matrix-title">Rogowski Model</h2>
+    <table aria-labelledby="matrix-title">
+      <thead><tr><th>economy</th><th scope="col">ADVANCED</th><th scope="col">BACKWARD</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">HIGH land:labor</th><td><span class="ab">ABUNDANT: Capital, Land</span><span class="sc">SCARCE: Labor</span></td><td><span class="ab">ABUNDANT: Land</span><span class="sc">SCARCE: Capital, Labor</span></td></tr>
+        <tr><th scope="row">LOW land:labor</th><td><span class="ab">ABUNDANT: Capital, Labor</span><span class="sc">SCARCE: Land</span></td><td><span class="ab">ABUNDANT: Labor</span><span class="sc">SCARCE: Capital, Land</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 08: Effects of Exposure — new slide -->
+  <section class="s ed violet" data-num="8" data-steps="4">
+    <p class="eyebrow">Stolper Samuelson</p>
+    <h2 class="headline">Effects of Exposure</h2>
+    <div class="rail">
+      <div class="f step" data-step="0"><span class="t">Advanced economies with abundant labor and scarce land: <strong>Urban-Rural Conflict</strong></span></div>
+      <div class="f step" data-step="1"><span class="t">Undeveloped economies with abundant land and scarce labor: <strong>Urban-Rural Conflict</strong></span></div>
+      <div class="f step" data-step="2"><span class="t">Undeveloped economies with abundant labor and scarce land: <strong>Class Conflict</strong></span></div>
+      <div class="f step" data-step="3"><span class="t">Advanced economies with abundant land and scarce labor: <strong>Class Conflict</strong></span></div>
+    </div>
+  </section>
+
+  <!-- 09: content retained from original slide 8 -->
+  <section class="s ed olive countries" data-num="9" data-steps="3">
+    <h2 class="headline">A period of expanding trade</h2>
+    <div class="rail">
+      <div class="f step" data-step="0"><span class="t">Germany: Capital Poor, Labor Rich, Land Poor.</span></div>
+      <div class="f step" data-step="1"><span class="t">US: Capital Poor, Labor Poor, Land Rich.</span></div>
+      <div class="f step" data-step="2"><span class="t">Britain: Capital Rich. Labor Rich. Land Poor.</span></div>
+    </div>
+  </section>
+
+  <!-- 10: content retained from original slide 9 -->
+  <section class="s ed olive results" data-num="10" data-steps="3">
+    <h2 class="headline">A period of expanding trade</h2>
+    <div class="rail">
+      <div class="f step" data-step="0"><span class="t">German Result: Class Conflict. Socialism. Protectionism. Imperialism.</span></div>
+      <div class="f step" data-step="1"><span class="t">US Result: Urban-Rural Conflict. Populism.</span></div>
+      <div class="f step" data-step="2"><span class="t">British Result: Expanded franchise. Democratization of institutions.</span></div>
+    </div>
+  </section>
+
+  <!-- 11: content retained from original slide 10 -->
+  <section class="s ed rust closing" data-num="11" data-steps="2">
+    <h2 class="headline">A period of decreasing trade</h2>
+    <div class="rail">
+      <div class="f step" data-step="0"><span class="t">In the 1930s, countries began cutting off trade.</span></div>
+      <div class="f step" data-step="1"><span class="t">Trade exposure affects politics, but politics also affects trade exposure.</span></div>
+    </div>
+  </section>
+
+  <!-- 12: Amy Pond — sanctions as exogenous protection -->
+  <section class="s scholar" data-num="12" data-steps="0">
+    <img class="portrait" src="images/amy-pond.webp" alt="Amy Pond, Washington University in St. Louis">
+    <div class="body">
+      <div class="cite-box">
+        <p class="cite-label">Citation</p>
+        <p class="cite-text">Pond, Amy. "Economic Sanctions and Demand for Protection." <em>Journal of Conflict Resolution</em> 61, no. 5 (2017): 1073–1094.</p>
+      </div>
+      <p class="takeaway">Sanctions as exogenously imposed protection still affect factor influence.</p>
+    </div>
+  </section>
+</div></div>
+<div id="progress" aria-hidden="true"><div id="barfill"></div></div>
+<script src="../../deck-player.js"></script>
+</body>
+</html>

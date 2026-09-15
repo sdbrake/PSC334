@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State-Based Theory — chartroom</title>
+<style>
+
+/* Edit palette and layout here; lecture wording is ordinary HTML below. */
+:root {
+ --paper:#f2efe9; --paper2:#e6e2d9; --ink:#1f2933; --muted:#69727c;
+ --olive:#2f7d5b; --rust:#c1502f; --amber:#b07d2b; --violet:#4a6fa5; --navy:#182030;
+ --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+ --sans:"Avenir Next","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--navy);color:var(--ink);font-family:var(--sans);overflow:hidden}
+#stage{position:fixed;inset:0;display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);place-items:center}
+#canvas{position:relative;width:1920px;height:1080px;transform-origin:center;background:var(--paper)}
+.s{position:absolute;inset:0;padding:112px 148px;display:flex;flex-direction:column;background:var(--paper);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease}
+.s.on{opacity:1;visibility:visible;pointer-events:auto}
+.headline{font-family:var(--serif);font-size:91px;font-weight:500;line-height:1.08;letter-spacing:-.035em;max-width:1580px}
+.eyebrow{font-size:24px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.violet{--hue:var(--violet)}.olive{--hue:var(--olive)}.rust{--hue:var(--rust)}.amber{--hue:var(--amber)}
+.ed .headline::before{content:"";display:block;width:80px;height:5px;background:var(--hue);margin-bottom:29px}
+.navy{background:var(--navy);color:var(--paper)}
+.cover{justify-content:center;padding:125px 180px}
+.cover .headline{font-size:154px;line-height:1.07;max-width:1500px}
+.cover:not(.chapter) .headline{max-width:1350px}
+.accent{height:6px;width:140px;background:var(--amber);margin-top:65px;flex-shrink:0}
+.rust-accent{background:var(--rust)}
+.chapter .headline{font-size:144px;max-width:1480px}
+.strategic-cover .headline{max-width:950px;font-size:174px}
+.step{opacity:0;visibility:hidden;transform:translateY(7px);transition:opacity .2s ease,transform .2s ease}
+.step.shown{opacity:1;visibility:visible;transform:none}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:54px;margin-top:68px}
+.card{border-top:4px solid var(--hue);padding:40px 40px 36px;background:rgba(255,255,255,.32)}
+.card-title{font-family:var(--serif);font-size:57px;line-height:1.13;font-weight:500;letter-spacing:-.025em}
+.card-line{font-size:39px;line-height:1.4;margin-top:38px}
+.approaches{gap:66px;margin-top:70px}
+.approaches .card{min-height:515px}
+.society{--hue:var(--amber)}.state{--hue:var(--violet)}
+.card-title{color:var(--hue)}
+.approaches .card-line+.card-line{padding-top:30px;border-top:1px solid rgba(31,41,51,.15)}
+.strength .question-title{font-family:var(--serif);font-size:81px;font-weight:500;line-height:1.12;letter-spacing:-.03em;margin-top:42px;max-width:1480px}
+.hypothesis{font-size:37px;color:var(--violet);margin-top:51px}
+.quotation{font-family:var(--serif);font-size:58px;line-height:1.24;border-left:4px solid var(--violet);padding-left:36px;margin-top:28px;max-width:1510px}
+.verdict{align-self:flex-end;font-family:var(--serif);font-style:italic;font-size:64px;color:var(--rust);margin-top:35px}
+.welfare .headline{font-size:82px;max-width:1550px}
+.thesis{font-family:var(--serif);font-size:89px;line-height:1.2;margin-top:84px;max-width:1500px}
+.ask{margin-top:65px;padding-top:28px;border-top:1px solid rgba(31,41,51,.2);font-size:51px;color:var(--olive)}
+.rail{display:grid;gap:32px;margin-top:66px}
+.f{border-left:4px solid var(--paper2);padding:8px 0 28px 34px;border-bottom:1px solid rgba(31,41,51,.16)}
+.f.current{border-left-color:var(--hue)}
+.t{font-size:47px;line-height:1.34}
+.logic .headline{font-size:84px}
+.logic .rail{margin-top:67px;gap:27px}
+.conclusion{font-family:var(--serif);font-size:63px;line-height:1.23;background:rgba(193,80,47,.07);border-left:5px solid var(--rust);padding:27px 36px;margin-top:45px}
+.barriers .headline{font-size:79px;max-width:1400px}
+.deck-intro{font-size:33px;color:var(--muted);margin-top:31px}
+.barriers-cards{margin-top:38px;gap:52px}
+.barriers-cards .card{min-height:410px;padding:34px 39px}
+.barriers-cards .card-title{font-size:58px}
+.barriers-cards .card-line{font-size:42px;line-height:1.38;margin-top:35px}
+.strategy .rail{margin-top:53px;gap:22px}
+.strategy .t{font-size:45px}
+.why{font-family:var(--serif);font-size:86px;color:var(--violet);margin-top:26px;line-height:1.12}
+.last-point{font-size:46px;line-height:1.34;margin-top:25px;max-width:1550px}
+.closing{justify-content:center;padding:130px 180px}
+.closing .eyebrow{color:#aeb8c6;margin-bottom:60px}
+.closing .headline{font-size:181px;line-height:1.03;max-width:1480px}
+#progress{position:fixed;bottom:0;left:0;right:0;height:4px;background:rgba(119,128,140,.14);z-index:5}
+#barfill{height:100%;background:var(--amber);width:0}
+@media(prefers-reduced-motion:reduce){.s,.step{transition:none;transform:none}}
+@page{size:1920px 1080px;margin:0}
+@media print{
+ body{overflow:visible;background:var(--paper)}
+ #stage{position:static;display:block}#canvas{transform:none!important;height:auto}
+ .s{position:relative;height:1080px;break-after:page}.s:last-child{break-after:auto}
+ .s,.step{opacity:1!important;visibility:visible!important;transform:none!important}
+ #progress{display:none}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+
+/* Two-section expansion: section labels and first-section layouts. */
+.part-label{position:absolute;top:45px;left:148px;font-size:21px;line-height:1.2;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.navy .part-label{color:#aeb8c6}
+.major .headline{max-width:1540px!important;font-size:146px}
+.new-part .headline{font-size:86px}
+.new-part .rail{margin-top:58px;gap:32px}
+.new-part .t{font-size:49px;line-height:1.34}
+.actor-thesis{font-size:53px;line-height:1.35;margin-top:57px;max-width:1570px}
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:27px 54px;margin-top:47px;padding-left:42px;border-left:3px solid var(--paper2)}
+.goal{font-family:var(--serif);font-size:53px;line-height:1.2;padding:26px 22px;border-top:3px solid var(--olive);background:rgba(255,255,255,.27)}
+.income .rail,.political .rail{margin-top:72px;gap:40px}
+.stability-rail{display:grid;gap:27px;margin-top:50px}
+.stability .t{font-size:46px}
+.factor-group{padding:0 0 17px 36px;border-left:4px solid var(--paper2)}
+.factor-label{font-size:43px;line-height:1.3}
+.factor-list{display:flex;align-items:center;list-style:none;gap:26px;margin-top:24px;margin-left:28px}
+.factor{font-family:var(--serif);font-size:43px;padding:18px 32px;background:rgba(193,80,47,.07);border-bottom:2px solid var(--rust)}
+.factor:last-child{background:transparent;font-family:var(--sans);font-size:37px;font-style:italic;border:0;padding-left:34px}
+.growth .rail{gap:15px;margin-top:42px}
+.growth .t{font-size:43px;line-height:1.25}
+.growth .f{padding:3px 0 16px 31px}
+.growth .conseq{font-size:39px;padding-left:64px;margin-left:32px;border-left:2px solid var(--paper2)}
+.structure .rail{margin-top:85px;gap:43px}
+.structure .t{font-family:var(--serif);font-size:69px}
+.hegemony .headline{max-width:1360px}
+.hegemony .rail{margin-top:63px;gap:35px}
+.history .headline{font-size:72px;max-width:1550px}
+.era-list{margin-top:45px;display:grid;gap:25px}
+.era{display:grid;grid-template-columns:325px 1fr;gap:38px;border-top:1px solid rgba(31,41,51,.2);padding-top:26px}
+.era-date{font-family:var(--serif);font-size:62px;line-height:1.1;color:var(--hue)}
+.era-detail{font-size:43px;line-height:1.3;padding-left:22px;border-left:3px solid var(--paper2)}
+.era-points{display:grid;gap:16px}
+.weakness .era-list{margin-top:35px;gap:21px}
+.weakness .era{padding-top:21px}
+.weakness .era-detail{font-size:37px;line-height:1.28}
+.weakness .era-date{font-size:56px}
+.imgfit{padding:100px 95px 85px;justify-content:center}
+.imgfit figure{width:100%;height:850px;display:flex;align-items:center;justify-content:center}
+.imgfit img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 7px 15px rgba(24,32,48,.08))}
+.big-question{justify-content:center;padding:140px 170px}
+.big-question .headline{font-size:122px;line-height:1.13;max-width:1560px}
+
+/* Review copy: reveal steps shown immediately. */
+.step{opacity:1;visibility:visible;transform:none}
+</style>
+</head>
+<body>
+<!-- Teaching deck: arrow/space reveals, Home/End, F fullscreen. All assets local. -->
+<div id="stage"><main id="canvas" aria-label="Lecture slides">
+<!-- 01: Aren't we forgetting someone?-->
+<section data-num="1" class="s cover navy major" data-steps="0" data-part="1" aria-hidden="true">
+<h1 class="headline">Don&#x27;t forget states</h1><div class="accent" aria-hidden="true"></div>
+</section>
+
+<!-- 02: Don't forget states -->
+<section data-num="2" class="s ed new-part olive actor" data-steps="5" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">The State As Actor</h2><p class="step actor-thesis" data-step="0">States want distinct things- not just the vessel of class, factor, or sector.</p><div class="goal-grid"><div class="step goal" data-step="1">Aggregate National Income</div><div class="step goal" data-step="2">Social Stability</div><div class="step goal" data-step="3">Political Power</div><div class="step goal" data-step="4">Economic Growth</div></div>
+</section>
+
+<!-- 03: Don't forget states -->
+<section data-num="3" class="s ed new-part olive income" data-steps="3" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Aggregate National Income</h2><div class="rail"><p class="step f t" data-step="0">Classical Econ tells us that trade openness is best for everyone for this</p><p class="step f t" data-step="1">Big and small states alike benefit from trade</p><p class="step f t" data-step="2">Perhaps the small states benefit more?</p></div>
+</section>
+
+<!-- 04: Don't forget states -->
+<section data-num="4" class="s ed new-part rust stability" data-steps="8" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Social Stability</h2><div class="stability-rail"><p class="step f t" data-step="0">Exposure to unpredictable world market can be dangerous</p><div class="factor-group"><p class="step factor-label" data-step="1">Trade moves factors:</p><ul class="factor-list"><li class="step factor" data-step="2">Land</li><li class="step factor" data-step="3">Labor</li><li class="step factor" data-step="4">Capital</li><li class="step factor" data-step="5">2/3 can move</li></ul></div><p class="step f t" data-step="6">Big states likely less bothered</p><p class="step f t" data-step="7">Developed states likely less bothered</p></div>
+</section>
+
+<!-- 05: Don't forget states -->
+<section data-num="5" class="s ed new-part violet political" data-steps="3" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Political Power</h2><div class="rail"><p class="step f t" data-step="0">The relationship is inverted here: The opportunity cost of closure weakens power</p><p class="step f t" data-step="1">Small states are the most vulnerable</p><p class="step f t" data-step="2">Dependent states are the most vulnerable</p></div>
+</section>
+
+<!-- 06: Don't forget states -->
+<section data-num="6" class="s ed new-part amber growth" data-steps="7" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Economic Growth</h2><div class="rail"><p class="step f t" data-step="0">For small states, access to markets is extremely important for growth</p><p class="step f t" data-step="1">For large states, access to markets is still helpful</p><p class="step f t" data-step="2">Small states get access to technology</p><p class="step f t" data-step="3">Large states lose technology advantages</p><p class="step f t" data-step="4">Exceptions:</p><p class="step conseq t" data-step="5">Dependency Theory</p><p class="step conseq t" data-step="6">Infant Industries</p></div>
+</section>
+
+<!-- 07: Don't forget states -->
+<section data-num="7" class="s ed new-part violet structure" data-steps="3" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Structure</h2><div class="rail"><p class="step f t" data-step="0">How Many States?</p><p class="step f t" data-step="1">Developed:Undeveloped Ratio</p><p class="step f t" data-step="2">Power ratio</p></div>
+</section>
+
+<!-- 08: Don't forget states -->
+<section data-num="8" class="s ed new-part olive hegemony" data-steps="3" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Hegemony is associated with Openness</h2><div class="rail"><p class="step f t" data-step="0">Big states want benefits</p><p class="step f t" data-step="1">Small states want access to big market</p><p class="step f t" data-step="2">Big state sets rules and example</p></div>
+</section>
+
+<!-- 09: Don't forget states -->
+<section data-num="9" class="s imgfit krasner" data-steps="0" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><figure><img src="images/Krasner.PNG" alt="Krasner: probability of an open trading structure by size and level of development of states"></figure>
+</section>
+
+<!-- 10: Don't forget states -->
+<section data-num="10" class="s ed new-part olive history support" data-steps="6" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Eras that Krasner thought support the argument:</h2><div class="era-list"><article class="era"><p class="step era-date" data-step="0">1820-1879</p><div class="era-points"><p class="step era-detail" data-step="1">Increasing openness and rising hegemony of Britain</p></div></article><article class="era"><p class="step era-date" data-step="2">1880-1900</p><div class="era-points"><p class="step era-detail" data-step="3">Modest closure as Britain declined</p></div></article><article class="era"><p class="step era-date" data-step="4">1945-1960</p><div class="era-points"><p class="step era-detail" data-step="5">As US rose, trade dramatically opened</p></div></article></div>
+</section>
+
+<!-- 11: Don't forget states -->
+<section data-num="11" class="s ed new-part rust history weakness" data-steps="8" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Eras that Krasner thought weaken the argument:</h2><div class="era-list"><article class="era"><p class="step era-date" data-step="0">1900-1913</p><div class="era-points"><p class="step era-detail" data-step="1">Before WWI, lots of trade despite no hegemon.</p><p class="step era-detail" data-step="2">Britain invested everything in free trade, and it cost them the empire</p></div></article><article class="era"><p class="step era-date" data-step="3">1919-1939</p><div class="era-points"><p class="step era-detail" data-step="4">US power was rising, but no one acted like a hegemon was rising.</p><p class="step era-detail" data-step="5">Closure, depression, etc</p></div></article><article class="era"><p class="step era-date" data-step="6">1960-1976</p><div class="era-points"><p class="step era-detail" data-step="7">Krasner thought US was declining, but trade wasn&#x27;t slowing.</p></div></article></div>
+</section>
+
+<!-- 12: Don't forget states -->
+<section data-num="12" class="s navy big-question" data-steps="0" data-part="1" aria-hidden="true">
+<p class="part-label">Don&#x27;t forget states</p><h2 class="headline">Was Krasner&#x27;s theory limited by his POV?</h2><div class="accent" aria-hidden="true"></div>
+</section>
+
+<!-- 13: Strategy of State-Centered Trade -->
+<section data-num="13" data-part="2" class="s cover navy major" data-steps="0" aria-hidden="true">
+<h2 class="headline">Strategy of<br>State-Centered Trade</h2><div class="accent" aria-hidden="true"></div>
+</section>
+
+<!-- 14: Strategy of State-Centered Trade -->
+<section data-num="14" data-part="2" class="s ed violet compare" data-steps="6" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<h2 class="headline">Basic Assumptions</h2><div class="cards approaches">
+<article class="card society">
+<h3 class="step card-title" data-step="0">Society Centered Approach:</h3>
+<p class="step card-line" data-step="1">Decisions are the result of interest groups</p>
+<p class="step card-line" data-step="2">The state is purely an agent of interests</p>
+</article>
+<article class="card state">
+<h3 class="step card-title" data-step="3">State Centered Approach:</h3>
+<p class="step card-line" data-step="4">The state’s decision makers try and work for the good of the state</p>
+<p class="step card-line" data-step="5">Interest groups do not override state interest</p>
+</article></div>
+</section>
+
+<!-- 15: Strategy of State-Centered Trade -->
+<section data-num="15" data-part="2" class="s ed violet strength" data-steps="4" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<p class="eyebrow">Basic Assumptions</p><h2 class="question-title">When would you choose one approach or another?</h2><p class="step hypothesis" data-step="1">Perhaps State Strength ?</p><blockquote class="step quotation" data-step="2">“The degree to which national policymakers . . . are insulated from domestic interest-group pressures”</blockquote><p class="step verdict" data-step="3">Questionable.</p>
+</section>
+
+<!-- 16: Strategy of State-Centered Trade -->
+<section data-num="16" data-part="2" class="s ed olive welfare" data-steps="2" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<h2 class="headline">Consumer Welfare/Growth Justification</h2><p class="step thesis" data-step="0">What’s good for the people is good for the state sometimes.</p><p class="step ask" data-step="1">When would this be true?</p>
+</section>
+
+<!-- 17: Strategy of State-Centered Trade -->
+<section data-num="17" data-part="2" class="s cover navy chapter" data-steps="0" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<h2 class="headline">Infant Industry Justification</h2><div class="accent rust-accent" aria-hidden="true"></div>
+</section>
+
+<!-- 18: Strategy of State-Centered Trade -->
+<section data-num="18" data-part="2" class="s ed rust logic" data-steps="3" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<h2 class="headline">Infant Industry Justification</h2><div class="rail">
+<div class="step f t" data-step="0">Assumption 1: It is good to have domestic industry.</div>
+<div class="step f t" data-step="1">Assumption 2: Domestic industries are not always immediately competitive</div>
+</div><p class="step conclusion" data-step="2">Ergo, it is good to temporarily protect domestic industries.</p>
+</section>
+
+<!-- 19: Strategy of State-Centered Trade -->
+<section data-num="19" data-part="2" class="s ed amber barriers" data-steps="3" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<h2 class="headline">Barriers to domestic industry success</h2><p class="step deck-intro" data-step="0">Reasons infant industries might struggle:</p><div class="cards barriers-cards">
+<article class="card step" data-step="1"><h3 class="card-title">Economies of Scale</h3><p class="card-line">When making more of a thing makes it substantially cheaper to make yet more of it.</p></article>
+<article class="card step" data-step="2"><h3 class="card-title">Economies of Experience</h3><p class="card-line">When production requires specific skills that require experience.</p></article>
+</div>
+</section>
+
+<!-- 20: Strategy of State-Centered Trade -->
+<section data-num="20" data-part="2" class="s cover navy chapter strategic-cover" data-steps="0" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<h2 class="headline">Strategic Trade</h2><div class="accent" aria-hidden="true"></div>
+</section>
+
+<!-- 21: Strategy of State-Centered Trade -->
+<section data-num="21" data-part="2" class="s ed violet strategy" data-steps="4" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<h2 class="headline">Strategic Trade</h2><div class="rail">
+<div class="step f t" data-step="0">Some important industries are oligopolistic</div>
+<div class="step f t" data-step="1">If a state contains one of the few oligopolistic firms, that could be very good.</div>
+</div><p class="step why" data-step="2">Why?</p><p class="step last-point" data-step="3">If your citizens’ firm is not first, it is less likely to displace the firm that already exists.</p>
+</section>
+
+<!-- 22: Strategy of State-Centered Trade -->
+<section data-num="22" data-part="2" class="s navy closing" data-steps="0" aria-hidden="true">
+<p class="part-label">Strategy of State-Centered Trade</p>
+<p class="eyebrow">Strategic Trade</p><h2 class="headline">So subsidize.</h2><div class="accent" aria-hidden="true"></div>
+</section>
+</main></div>
+<div id="progress" aria-hidden="true"><div id="barfill"></div></div>
+<script src="../../deck-player.js"></script>
+</body>
+</html>

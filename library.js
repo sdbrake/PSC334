@@ -88,9 +88,26 @@
     $("fullscreen").disabled = false;
   });
 
+  // The fallback behaves like a modal: background content cannot receive focus.
+  const backgroundState = new Map();
+  function enterFocusMode() {
+    document.querySelectorAll(".sidebar, .skip-link, .lecture-heading, .reader-footer").forEach(element => {
+      backgroundState.set(element, element.inert);
+      element.inert = true;
+    });
+    document.body.classList.add("focus-mode");
+  }
+  document.addEventListener("focusin", event => {
+    if (document.body.classList.contains("focus-mode") && !$("presentation").contains(event.target)) {
+      $("exit-fullscreen").focus();
+    }
+  });
+
   async function exitFullscreen() {
     if (document.fullscreenElement) await document.exitFullscreen();
     document.body.classList.remove("focus-mode");
+    backgroundState.forEach((wasInert, element) => { element.inert = wasInert; });
+    backgroundState.clear();
     $("fullscreen").focus();
   }
   $("fullscreen").addEventListener("click", async () => {
@@ -99,7 +116,7 @@
       await $("presentation").requestFullscreen();
     } catch {
       // Embedded previews / mobile browsers may deny the Fullscreen API.
-      document.body.classList.add("focus-mode");
+      enterFocusMode();
     }
     $("exit-fullscreen").focus();
   });
@@ -116,6 +133,17 @@
   $("next").addEventListener("click", () => command("next"));
 
   document.addEventListener("keydown", event => {
+    if (event.key === "Tab" && document.body.classList.contains("focus-mode")) {
+      const controls = Array.from($("presentation").querySelectorAll("button:not(:disabled), iframe:not([hidden])"))
+        .filter(element => element.getClientRects().length);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    }
     if (event.key === "Escape") { exitFullscreen(); setMenu(false); return; }
     if (event.target.closest("input, textarea, select, [contenteditable='true']") || event.altKey || event.ctrlKey || event.metaKey) return;
     // Space on a focused button keeps its native activation behavior.

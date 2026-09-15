@@ -1,12 +1,54 @@
-# Chartroom Course Library
+# PSC 334 — Chartroom Course Library
 
 A reusable, plain-HTML lecture review website. Navy lecture sidebar, paper-colored viewer, Previous/Next controls, slide counter, and fullscreen. There is no framework, build step, database, CDN, Google Apps Script, or account system.
+
+## START HERE — the important distinction
+
+**Teach from the originals. Give students the separate review copies. Do not replace the navigation script in a teaching original.**
+
+This folder is the **PSC 334 student review website**, not the master copy of your teaching lectures.
+
+| Location (under `HermesAssistant/`) | What it is | What to do with it |
+| --- | --- | --- |
+| `Lecture Slides/` | Original teaching lectures — the source of truth | Teach from these; make your lecture revisions here. |
+| `IPE Course Library/` | The current seven-lecture student review website | Open its `index.html` to browse the library. |
+| `IPE Course Library/lectures/` | Separate review copies and images | Prepare copies here for students, never move the originals here. |
+| `Course Library/` | Earlier one-lecture design prototype | Reference only; use `IPE Course Library/` for this course. |
+| `IPE Course Library - portable.zip` | A packaged snapshot of the review website | Extract the whole ZIP before opening `index.html`; it is not a live/synced copy. |
+
+### What is different about review copies?
+
+- Teaching originals keep their existing classroom behavior, including stepwise reveals and saved position where implemented.
+- Review copies show every bullet immediately, do not restore saved teaching positions, and work with the website's Previous/Next buttons.
+- Selecting a lecture in the website always starts at the beginning.
+- **The two copies do not automatically sync.** Editing a teaching deck does not update the review copy or a previously downloaded ZIP.
+
+### Quick answers for future you
+
+- **I want to teach:** open the original HTML in `Lecture Slides/`.
+- **I want to preview the student website:** open `IPE Course Library/index.html`.
+- **I want to change the course number, a sidebar title, or lecture order:** edit `course.js`, not `library.js`.
+- **I want to add a lecture:** copy its HTML and images into `lectures/`, replace the copied navigation script as described below, then add its path to `course.js`.
+- **I want to correct lecture content:** revise the original first, then refresh its review copy using the checklist below.
+- **I want to use this for another class:** duplicate the whole website folder, then edit `course.js`; keep each class's copy separate.
 
 ## Open it
 
 Double-click **index.html** to open in Chrome or Edge. Keep the folder together: index.html needs the other files beside it. The website also works on an ordinary static web host such as GitHub Pages. This copy has not been published.
 
-The initial demo uses POLI 433 / International Political Economy, with the existing **Three Schools of IPE** chartroom lecture and 13 clearly unnamed Coming soon slots. Their order and names are placeholders, not a proposed syllabus. Change the course code if needed.
+This is the seven-lecture **PSC 334 / International Political Economy** edition. The approved one-lecture prototype remains in the separate `Course Library` folder.
+
+| Order | Sidebar title | Slides | Source deck |
+| --- | --- | --- | --- |
+| 01 | What is IPE? | 11 | What is IPE - chartroom.html |
+| 02 | Three Schools of IPE | 16 | Three Schools of IPE - chartroom.html |
+| 03 | WTO System | 26 | The Rise of the WTO System - slides.html |
+| 04 | Corn Laws | 31 | Examining the Corn Laws - slides.html |
+| 05 | Global Growth and Inequality | 42 | Global Growth and Inequality - slides.html |
+| 06 | Society-Based Theory | 12 | Stolper Samuelson - chartroom.html |
+| 07 | State-Based Theory | 22 | State Centered Trade - chartroom.html |
+
+Slots 08–14 remain Coming soon. **160 slides total.** Sidebar titles follow the requested list (including the two renamed theory lectures); the original titles inside the decks are preserved.
 
 ## What you normally edit
 
@@ -56,12 +98,47 @@ The shell is reusable across classes. Its bundled player specifically understand
 
    Replace the old navigation code; don't leave both players running. Keep unrelated content scripts only if you know they don't control slides. The test lecture is a working example of the exact replacement.
 
-4. Add its path to course.js.
+4. Edit `course.js`. For example, replace a future slot:
+
+   ```js
+   { title: "Lecture 06", file: null },
+   ```
+
+   with the path to your prepared review copy:
+
+   ```js
+   { title: "Your lecture title", file: "lectures/trade-theory/index.html" },
+   ```
+
+   Use `null` until it is ready. Numbering comes from the list order; do not type the number into the title.
 5. Open the library, click that lecture, try the controls, then select it again to confirm it starts at slide one.
 
 The supported deck structure is a fixed-size `#canvas` containing slides with class `.s`; the active slide uses `.on`. The player reads the canvas dimensions, scales it to fit, and centers it. Standard chartroom bullet reveals (`.rail .f` and `.rail .conseq`) are shown immediately for review. Different slide frameworks require their own adapter; simply linking an arbitrary HTML URL is not enough to connect navigation.
 
 All lecture files should live in this website folder / on the same web origin. Cross-origin embeds are intentionally not accepted by the control bridge. Use only trusted, professor-authored HTML; this is not an untrusted-file upload service.
+
+## Updating a lecture after you have revised it
+
+1. Make and save the revision in the **teaching original** under `Lecture Slides/`.
+2. Keep a backup of its current review folder before replacing anything.
+3. Copy the revised HTML and any changed/new images into the matching `IPE Course Library/lectures/` folder. Keep the destination filename/path the same so `course.js` still points to it.
+4. **Replace the old navigation script again in the new review copy.** Copying a fresh teaching HTML file also copies its teaching player back in. Use the single `../../deck-player.js` script line shown above, in place of the old navigation block.
+5. Check for review-only layout adjustments before discarding the backup. In the included Global Growth and Inequality deck, `review-compact` is a spacing fix for **Convergence is uncommon**. Preserve/reapply it if still needed; do not copy it back into the original automatically.
+6. Open the library. Check changed slides, images, Previous/Next, and that reselecting the lecture returns to slide one.
+7. If publishing, upload/push the revised review HTML and any changed assets to the same website location. The professor handles publishing. No Apps Script redeployment is involved.
+8. If sharing a ZIP, make a new ZIP from the current website files. **An old ZIP will still contain old content.**
+
+### Quick troubleshooting
+
+| Symptom | First thing to check |
+| --- | --- |
+| Lecture says Coming soon | Its `course.js` entry still has `file: null`. |
+| Lecture will not load | The configured path and capitalization match the actual HTML file; the review copy links to `deck-player.js`. |
+| Buttons do nothing or each press only reveals one bullet | The old teaching navigation script may still be present. Replace it in the review copy only. |
+| Images are missing | Their files were copied too, with the same relative locations and exact filenames. |
+| Website still shows old text | Update the review copy, not just the original; if hosted, publish it and refresh the browser. |
+| ZIP still shows old text | Repackage the current website; ZIP files do not update themselves. |
+| Live site has the wrong course number | This course is **PSC 334**. Check the published `course.js`, not an old prototype or ZIP. |
 
 ## Student behavior
 
@@ -92,34 +169,37 @@ A public GitHub Pages site is public: only publish material intended for public 
 
 ## Original lecture preservation
 
-The demo lecture's author content and CSS are copied from:
+All seven decks were copied from their matching folders under `Lecture Slides/`. Their original files and images were left untouched. Each review copy uses the shared navigation script instead of the old teaching script; lecture wording is preserved exactly.
 
-`Lecture Slides/Three Schools of IPE/Three Schools of IPE - chartroom.html`
+One review-only spacing repair was needed: slide 8, **Convergence is uncommon**, in Global Growth and Inequality has tighter vertical spacing to keep its last sentence within the canvas. This is clearly marked `review-compact` in that copied HTML file. No words were changed or removed.
 
-Only its old navigation script was replaced in the review copy. The source teaching deck was left untouched. The shared review player changes active-slide state, bullet reveal state, scaling, accessibility attributes, and transitions at runtime; it does not rewrite lecture wording.
+The two theory lectures (**Society-Based Theory** and **State-Based Theory**) hide their bullet points until revealed in teaching mode, so each review copy appends one review-only CSS rule (`.step{opacity:1;visibility:visible;transform:none}`) that shows every reveal step immediately. No wording was changed; only the decks' browser-tab titles were retitled to the sidebar names.
 
-## Development checks (optional)
+The fallback fullscreen view keeps Tab focus within the presentation and temporarily makes covered page controls inert. On exit it restores the page controls and returns focus to Full screen.
 
-Node and Playwright are only needed to run the tests, not to use the website. The included tests launch locally installed Chrome on Windows. Change the executable path in tests if needed.
+## Development verification (optional)
 
-From this folder:
+The website needs no development dependencies. `tests/` is excluded from the portable ZIP.
 
-```bash
-node tests/library.test.cjs
-node tests/visual-audit.cjs
-```
+The focused browser script `tests/course.test.cjs` checks the seven-lecture order, every slide, local images, bullet reveals, restart-on-selection, mobile menu and fallback fullscreen focus. It runs installed Chrome on Windows. The source manifest records original-file hashes for preservation checks.
 
-For HTTP and alternate-course checks, start a local server:
+These are **ad-hoc verification scripts**, not a canonical build or test suite.
 
-```bash
-python -m http.server 8765 --bind 127.0.0.1
-```
-
-Then in another terminal:
+If you want to run them in a copied development folder:
 
 ```bash
-LIBRARY_URL=http://127.0.0.1:8765/ node tests/library.test.cjs
-node tests/reuse.test.cjs
+npm install --prefix tests playwright
+node tests/course.test.cjs
 ```
 
-The reuse tests override course.js **in the test browser only**, using explicitly synthetic course labels. They do not change the real course file. The visual audit checks all 16 source slides for text crossing the canvas boundary and saves screenshots under tests/screenshots/.
+On this machine the script can also use the prototype's existing Playwright installation. To check HTTP hosting, start a server:
+
+```bash
+python -m http.server 8766 --bind 127.0.0.1
+```
+
+Then, in another terminal:
+
+```bash
+LIBRARY_URL=http://127.0.0.1:8766/ node tests/course.test.cjs
+```
