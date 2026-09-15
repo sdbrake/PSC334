@@ -64,7 +64,6 @@ iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .exit-fullscreen { display: none; }
 #presentation:fullscreen, .focus-mode #presentation { background: var(--paper); padding: 45px 35px 20px; }
 #presentation:fullscreen .exit-fullscreen, .focus-mode .exit-fullscreen { display: block; position: absolute; top: 4px; right: 35px; }
-body.focus-mode { overflow: hidden; }
 .focus-mode #presentation { position: fixed; inset: 0; z-index: 20; }
 /* Reserve space for the exit button, stage padding and navigation bar. */
 .focus-mode #slide-shell, #presentation:fullscreen #slide-shell { max-width: calc((100dvh - 190px) * 16 / 9); }

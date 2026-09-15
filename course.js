@@ -1,17 +1,18 @@
-/* MAIN EDITING FILE: course details and lecture order.
-   A file path makes a lecture clickable. null means Coming soon.
-   Numbering is automatic. Add/remove/reorder lines as needed. */
+/* EDIT THIS FILE to reuse the library for another class.
+   Copy a lecture folder into lectures/, then set its file below.
+   file: null means Coming soon. Entries appear in the order written.
+   There is no fixed limit: add or remove entries as needed. */
 window.COURSE = {
   title: "International Political Economy",
-  code: "PSC 334",
+  code: "POLI 433",
   subtitle: "Lecture review",
   lectures: [
-    { title: "What is IPE?", file: "lectures/what-is-ipe/index.html" },
     { title: "Three Schools of IPE", file: "lectures/three-schools/index.html" },
-    { title: "WTO System", file: "lectures/wto-system/index.html" },
-    { title: "Corn Laws", file: "lectures/corn-laws/index.html" },
-    { title: "Global Growth and Inequality", file: "lectures/global-growth-inequality/index.html" },
-    // Unnamed future lectures: replace these titles when ready.
+    // These are deliberately unnamed placeholders, not a proposed syllabus.
+    { title: "Lecture 02", file: null },
+    { title: "Lecture 03", file: null },
+    { title: "Lecture 04", file: null },
+    { title: "Lecture 05", file: null },
     { title: "Lecture 06", file: null },
     { title: "Lecture 07", file: null },
     { title: "Lecture 08", file: null },
