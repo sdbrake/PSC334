@@ -173,7 +173,7 @@ All seven decks were copied from their matching folders under `Lecture Slides/`.
 
 One review-only spacing repair was needed: slide 8, **Convergence is uncommon**, in Global Growth and Inequality has tighter vertical spacing to keep its last sentence within the canvas. This is clearly marked `review-compact` in that copied HTML file. No words were changed or removed.
 
-The two theory lectures (**Society-Based Theory** and **State-Based Theory**) hide their bullet points until revealed in teaching mode, so each review copy appends one review-only CSS rule (`.step{opacity:1;visibility:visible;transform:none}`) that shows every reveal step immediately. No wording was changed; only the decks' browser-tab titles were retitled to the sidebar names.
+The two theory lectures (**Society-Based Theory** and **State-Based Theory**) hide their bullet points until revealed in teaching mode, so each review copy appends one review-only CSS rule (`.step{opacity:1;visibility:visible;transform:none}`) that shows every reveal step immediately. No wording was changed; only the decks' browser-tab titles were retitled to the sidebar names. Their two photos (the Krasner table and the Amy Pond portrait) are embedded directly in the review HTML as `data:` URLs so they render even inside embedded preview panes that cannot fetch separate image files; the teaching originals keep their `images/` folders and are unchanged.
 
 The fallback fullscreen view keeps Tab focus within the presentation and temporarily makes covered page controls inert. On exit it restores the page controls and returns focus to Full screen.
 
