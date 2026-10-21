@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MNCs and Politics / FDI</title>
+<style>
+
+:root{--paper:#f2efe9;--paper2:#e6e2d9;--ink:#1f2933;--muted:#77808c;--olive:#2f7d5b;--rust:#c1502f;--amber:#b07d2b;--violet:#4a6fa5;--navy:#182030}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--paper);color:var(--ink)}body{font-family:Arial,Helvetica,sans-serif;overflow:hidden}#viewport{position:fixed;inset:0;display:grid;place-items:center}#canvas{position:relative;width:1600px;height:900px;flex-shrink:0;transform-origin:center center;background:var(--paper)}
+.slide{position:absolute;inset:0;padding:76px 100px 68px;--accent:var(--olive);--fit:1;overflow:visible}.slide[hidden]{display:none!important}.slide-inner{height:100%;display:flex;flex-direction:column;gap:24px;position:relative;z-index:1}.slide h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:calc(80px * var(--fit));line-height:1.08;margin:0;letter-spacing:-.025em;overflow-wrap:break-word}.eyebrow{color:var(--accent);font-size:calc(22px * var(--fit));font-weight:bold;letter-spacing:.14em;text-transform:uppercase;margin:0}.content{font-size:calc(36px * var(--fit));line-height:1.32;min-height:0;flex:1}.content p{margin:0 0 .65em}.content ul{margin:0;padding:0;list-style:none}.rail>li{padding:.43em 0;border-top:1px solid #b9bab6}.children{padding-left:1.1em!important;margin-top:.25em!important;font-size:.82em;list-style:disc!important}.children>li{padding:.15em 0}.content strong{font-weight:700}.cards-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px}.cards-list>li{padding:30px;background:var(--paper2);border-top:5px solid var(--accent)}.columns{display:grid;grid-template-columns:1fr 1fr;gap:64px}.column h2{font-family:Georgia,serif;font-weight:400;font-size:calc(44px * var(--fit));margin:0 0 20px;color:var(--accent)}.polarity .column:first-child{--accent:var(--rust)}.polarity .column:last-child{--accent:var(--olive)}
+.cover,.part,.big{background:var(--navy);color:var(--paper)}.cover .slide-inner,.part .slide-inner,.divider .slide-inner,.big .slide-inner{justify-content:center}.cover h1,.part h1,.divider h1,.big h1{font-size:calc(116px * var(--fit));max-width:1300px}.cover .content:empty,.part .content:empty,.divider .content:empty,.big .content:empty{display:none}.quote .body{font-family:Georgia,serif;font-style:italic;font-size:calc(58px * var(--fit));line-height:1.22}.attribution,.credit,.citation{font-size:calc(23px * var(--fit));line-height:1.35;color:var(--muted)}.attribution{letter-spacing:.04em}.footer{font-family:Georgia,serif;font-style:italic;font-size:calc(27px * var(--fit));margin:0}.takeaway{border-left:5px solid var(--accent);padding:15px 24px;background:var(--paper2)}
+.photo,.somber{background:var(--navy);color:var(--paper)}.background-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.photo:after,.somber:after{content:'';position:absolute;inset:0;background:rgba(24,32,48,.34)}.somber:after{background:rgba(24,32,48,.62)}.photo h1,.somber h1{font-size:calc(112px * var(--fit));text-shadow:0 3px 16px #182030}.photo .slide-inner,.somber .slide-inner{justify-content:center}.photo .content:empty,.somber .content:empty{display:none}.photo .credit,.somber .credit{color:var(--paper)}
+.exhibit{margin:0;min-height:0;height:100%;display:flex;flex-direction:column;gap:12px}.exhibit img{width:100%;height:100%;min-height:0;object-fit:contain}.exhibit figcaption{flex:none}.img .content{display:flex;flex-direction:column;gap:16px}.img .exhibit{flex:1}.portraits{display:grid;grid-template-columns:1fr 1fr;gap:60px;height:100%;min-height:0}.portrait{margin:0;display:flex;flex-direction:column;min-height:0;gap:12px}.portrait img{width:100%;height:360px;object-fit:contain}.portrait figcaption{font-family:Georgia,serif;font-size:calc(38px * var(--fit))}.scholar-grid{display:grid;grid-template-columns:390px 1fr;gap:54px;height:100%;min-height:0}.scholar-grid img{width:100%;max-height:480px;object-fit:contain}.scholar-copy{min-width:0}.scholar-copy .citation{margin-bottom:28px}
+.meters{display:flex;gap:60px;margin-top:auto;padding-top:12px}.meter{flex:1}.meter-label{font-size:calc(21px * var(--fit));margin-bottom:12px}.axis-labels{display:flex;justify-content:space-between;font-size:18px;letter-spacing:.06em;margin-bottom:14px}.axis-labels span:first-child{color:var(--rust)}.axis-labels span:last-child{color:var(--olive)}.track{height:7px;position:relative;background:linear-gradient(to right,var(--rust),var(--paper2),var(--olive));margin:0 9px 10px}.marker{position:absolute;left:var(--position);top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--ink);border:3px solid var(--paper)}.lens-axis{margin:80px 0}.lens-axis .track{height:14px}.lens-axis .axis-labels{font-size:28px}
+#progress{position:fixed;left:0;bottom:0;height:4px;background:var(--amber);width:0;z-index:10}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media print{@page{size:1600px 900px;margin:0}html,body{height:auto;overflow:visible}#viewport{position:static;display:block}#canvas{transform:none!important;height:auto} .slide,.slide[hidden]{display:block!important;position:relative;width:1600px;height:900px;break-after:page;page-break-after:always} [data-reveal]{visibility:visible!important;opacity:1!important}#progress,#player-status{display:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+/* Review copy only: the library supplies the progress display. */
+#progress{display:none!important}
+</style>
+</head>
+<body data-mode="review" data-deck-id="workshop" data-storage-key="chartroom:b5657c5d588c02dd">
+<main id="viewport" aria-label="Lecture slides"><div id="canvas">
+<section class="slide cover" data-slide="0" style="--accent:var(--olive)" aria-labelledby="slide-title-0">
+<div class="slide-inner">
+<h1 id="slide-title-0">MNCS and Politics</h1>
+<div class="content"></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="1" style="--accent:var(--olive)" aria-labelledby="slide-title-1" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-1">Post WWI World:</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>American corporations began establishing local factories in other countries.</li>
+<li data-reveal>Europe and Japan started joining them in the 1960s</li>
+<li data-reveal>This gave rise to a new actor:<ul class="children">
+<li>The NMC/TNC/MNE/TNE</li>
+</ul></li>
+</ul><p class="takeaway">Nobody knows how to think about this.</p></div>
+
+</div>
+</section>
+
+<section class="slide big" data-slide="2" style="--accent:var(--olive)" aria-labelledby="slide-title-2" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-2">Economic production is organized <strong>globally</strong> but political systems remain organized <strong>nationally</strong>.</h1>
+<div class="content"></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="3" style="--accent:var(--olive)" aria-labelledby="slide-title-3" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-3">Contradictions:</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>They violate the law of comparative advantage.<ul class="children">
+<li>Can you figure out how?</li>
+</ul></li>
+<li data-reveal>Some are larger in income and wealth than many countries.<ul class="children">
+<li>But they do not have sovereign authority or power.</li>
+</ul></li>
+<li data-reveal>They use non-market means of allocating resources.<ul class="children">
+<li>But we previously agreed that markets are the most efficient way to allocate resources. Are they stupid?</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide big" data-slide="4" style="--accent:var(--olive)" aria-labelledby="slide-title-4" hidden inert>
+<div class="slide-inner">
+<p class="eyebrow">The specific behavior of MNCs has a name:</p>
+<h1 id="slide-title-4">FDI</h1>
+<div class="content"></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="5" style="--accent:var(--olive)" aria-labelledby="slide-title-5" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-5">Effects of FDI:</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Moves Capital<ul class="children">
+<li>From where it is <strong>abundant</strong> to where it is <strong>scarce</strong>.</li>
+<li>But... there is also FDI between similarly endowed nations. It&#39;s the majority.</li>
+</ul></li>
+<li data-reveal>Cultural Imperialism<ul class="children">
+<li>Causes consumer patterns in MNC countries to be replicated in branch countries</li>
+<li>Coca-Cola, sometimes war</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="6" style="--accent:var(--olive)" aria-labelledby="slide-title-6" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-6">The Question:</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Why do MNCs exist?<ul class="children">
+<li>Why acquire their competitors and supply chain, avoiding the market?</li>
+<li>Why do business internationally, with all the complications, instead of just lending money?</li>
+<li>Why not just do business with firms in other countries?</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="7" style="--accent:var(--olive)" aria-labelledby="slide-title-7" hidden inert>
+<div class="slide-inner">
+<p class="eyebrow">Answer One:</p>
+<h1 id="slide-title-7">Product Cycle Theory</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Reymond Verner came up with a theory that there is a natural cycle.<ul class="children">
+<li>1. Firm introduces a product for the domestic market.</li>
+<li>2. Firm exports the product to foreign markets.</li>
+<li>3. Firm invests in production in the foreign market to sell there.</li>
+<li>4. Firm exports the product back home.</li>
+</ul></li>
+</ul><p class="takeaway">It&#39;s a natural process with explainable steps, not a strategy.</p></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="8" style="--accent:var(--olive)" aria-labelledby="slide-title-8" hidden inert>
+<div class="slide-inner">
+<p class="eyebrow">Answer Two:</p>
+<h1 id="slide-title-8">Transaction Costs</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>There are LOCATIONAL advantages that markets cannot alleviate</li>
+<li data-reveal>Things the MNC can use, but not contract upon or own.</li>
+<li data-reveal>Examples:<ul class="children">
+<li>Proprietary Assets (Public goods, ingangibles, or diffuse goods)</li>
+<li>Relationships (especially in the service industry)</li>
+<li>Natural Resource investments</li>
+<li>Market oriented investments (getting market access to restricted markets)</li>
+<li>Efficiency oriented investments</li>
+</ul></li>
+</ul><p class="takeaway">It&#39;s about leveraging local advantages.</p></div>
+
+</div>
+</section>
+
+<section class="slide cards" data-slide="9" style="--accent:var(--olive)" aria-labelledby="slide-title-9" hidden inert>
+<div class="slide-inner">
+<p class="eyebrow">Answer Three:</p>
+<h1 id="slide-title-9">Market Failures</h1>
+<div class="content"><ul class="cards-list">
+<li>Horizontal Integration:<ul class="children">
+<li>A firm creates multiple production facilities that produce the same good. (buying or founding what would normally be competitors. Toyota making cars in Japan and in the US)</li>
+<li>Market failure: Intangible assets can’t be sold</li>
+</ul></li>
+<li>Vertical Integration:<ul class="children">
+<li>A firm buys the production of intermediate goods.</li>
+<li>Market failure: Specific Asset: Some of these things require long term relationships that contracts can’t provide, like a supply chain.</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide cards" data-slide="10" style="--accent:var(--olive)" aria-labelledby="slide-title-10" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-10">The entire process is called: Global Value Chain:</h1>
+<div class="content"><ul class="cards-list">
+<li><strong>MNC advantages: </strong><ul class="children">
+<li>Bringing resources</li>
+<li>Bringing technology/expertise</li>
+<li>More positive externalities</li>
+<li>Access to marketing networks</li>
+<li>Raising wages</li>
+</ul></li>
+<li><strong>MNC disadvantages:</strong><ul class="children">
+<li>Crowding out domestic investment</li>
+<li>MNCs extracting fees</li>
+<li>Requiring purchases from corporation</li>
+<li>Drive domestic firms out of business</li>
+<li>Less power for domestic government to control economy</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="11" style="--accent:var(--olive)" aria-labelledby="slide-title-11" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-11">FDI and Democracy</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Democracy encourages FDI<ul class="children">
+<li>Property Rights</li>
+<li>Lower Risk</li>
+</ul></li>
+<li data-reveal>Democracy discourages FDI<ul class="children">
+<li>Local interests demand protection</li>
+<li>Collective action problems</li>
+</ul></li>
+</ul><p class="takeaway">Reseach supports this: Democracies with weak property rights have less FDI</p></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="12" style="--accent:var(--olive)" aria-labelledby="slide-title-12" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-12">What role should MNCs play in the concerns of a state?</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Answer from :<ul class="children">
+<li>ISI/Structuralist</li>
+<li>Institutionalist</li>
+<li>Liberal</li>
+<li>Dependency Theorist</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+</div></main>
+<div id="progress" aria-hidden="true"></div>
+<p id="player-status" class="sr-only" role="status" aria-live="polite"></p>
+<script>
+/* Review-only bridge for the PSC 334 library; original Studio fitting retained. */
+(function deckPlayer() {
+    'use strict';
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const review = document.body.dataset.mode === 'review';
+    let index = 0, step = 0;
+    const max = i => review || !slides[i] ? 0 : slides[i].querySelectorAll('[data-reveal]').length;
+    const clamp = (n,lo,hi) => Math.max(lo,Math.min(hi,n));
+    const getState = () => ({index,step,count:slides.length});
+    let parentOrigin = location.origin;
+    try {parentOrigin = document.referrer ? new URL(document.referrer).origin : (location.ancestorOrigins && location.ancestorOrigins[0]) || location.origin;} catch (_) {}
+    // Chromium reports file:// in ancestorOrigins but serializes message origins as null.
+    if (parentOrigin === 'file://') parentOrigin = 'null';
+    const images=Array.from(document.images);
+    const post = type => {if (parent !== window) parent.postMessage({type,...getState(),total:slides.length,resourcesReady:images.every(img=>img.complete),failedImages:images.filter(img=>img.complete && !img.naturalWidth).length},parentOrigin === 'null' ? '*' : parentOrigin);};
+    window.addEventListener('message',event=>{
+      if(parent === window || event.source !== parent || event.origin !== parentOrigin || !event.data || event.data.type !== 'chartroom:command')return;
+      const actions={next,previous,first:home,last:end,go:()=>go(event.data.index),state:()=>post('chartroom:state'),escape:()=>post('chartroom:exit')};
+      if(Object.prototype.hasOwnProperty.call(actions,event.data.action))actions[event.data.action]();
+    });
+    const storageKey = document.body.dataset.storageKey;
+    if (!review) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (saved && Number.isInteger(saved.index) && Number.isInteger(saved.step) && slides.length) {
+          index=clamp(saved.index,0,slides.length-1);step=clamp(saved.step,0,max(index));
+        }
+      } catch (_) { /* Local-file privacy settings and corrupt saves are harmless. */ }
+    }
+    function show() {
+      if (!review) {try {localStorage.setItem(storageKey,JSON.stringify(getState()));} catch (_) {}}
+      slides.forEach((s,i) => {
+        s.hidden = i !== index; s.inert = i !== index;
+        s.setAttribute('aria-hidden',String(i !== index));
+        s.querySelectorAll('[data-reveal]').forEach((el,j) => {
+          const visible = review || j < (i === index ? step : 0);
+          el.style.visibility = visible ? 'visible' : 'hidden';
+          el.setAttribute('aria-hidden',String(!visible));
+        });
+      });
+      post('chartroom:state');
+      document.getElementById('progress').style.width = (slides.length ? (index + 1) / slides.length * 100 : 0) + '%';
+      document.getElementById('player-status').textContent = slides.length ? 'Slide ' + (index + 1) + ' of ' + slides.length + ': ' + slides[index].querySelector('h1').textContent : 'No slides';
+    }
+    function go(n) { if (Number.isFinite(n) && slides.length) {index=clamp(Math.trunc(n),0,slides.length-1);step=0;show();} return getState(); }
+    function next() {if(step<max(index)){step++;show();}else if(index<slides.length-1)go(index+1);return getState();}
+    function previous() {if(step>0){step--;show();}else if(index>0){index--;step=max(index);show();}return getState();}
+    function home(){return go(0);}
+    function end(){if(slides.length){index=slides.length-1;step=max(index);show();}return getState();}
+    function resize() {
+      const canvas=document.getElementById('canvas');
+      canvas.style.position='absolute';canvas.style.left='50%';canvas.style.top='50%';
+      canvas.style.transform='translate(-50%,-50%) scale(' + Math.min(innerWidth/1600,innerHeight/900) + ')';
+    }
+    function measure(s) {
+      const inner=s.querySelector('.slide-inner'),content=s.querySelector('.content');
+      const overflowX=Math.max(0,inner.scrollWidth-inner.clientWidth,content.scrollWidth-content.clientWidth);
+      const overflowY=Math.max(0,inner.scrollHeight-inner.clientHeight,content.scrollHeight-content.clientHeight);
+      return {overflow:overflowX>2 || overflowY>2,overflowX,overflowY};
+    }
+    function audit() {
+      const results=slides.map((s,i)=>{
+        const wasHidden=s.hidden;s.hidden=false;
+        s.style.setProperty('--fit',1);
+        let fit=1,overflow=measure(s);
+        while(overflow.overflow && fit>.751){fit=Math.max(.75,fit-.025);s.style.setProperty('--fit',fit.toFixed(3));overflow=measure(s);}
+        s.dataset.overflow=String(overflow.overflow);s.dataset.fit=fit.toFixed(3);s.hidden=wasHidden;
+        return {slide:i,title:s.querySelector('h1').textContent,fit:Number(fit.toFixed(3)),...overflow};
+      });
+      document.body.dataset.overflow=String(results.some(r=>r.overflow));
+      return results;
+    }
+    window.ChartroomPlayer = {next,previous,home,end,go,getState,audit};
+    window.addEventListener('resize',resize);
+    window.addEventListener('load',()=>{resize();audit();post('chartroom:state');});
+    images.forEach(img=>{const settled=()=>{audit();post('chartroom:state');};img.addEventListener('load',settled);img.addEventListener('error',settled);});
+    resize();audit();
+    document.addEventListener('keydown',event => {
+      if(event.altKey || event.ctrlKey || event.metaKey || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(event.target.tagName) || event.target.isContentEditable)return;
+      const action = {ArrowRight:next,ArrowDown:next,' ':next,PageDown:next,ArrowLeft:previous,ArrowUp:previous,PageUp:previous,Home:home,End:end,Escape:()=>post('chartroom:exit')}[event.key];
+      if(action){event.preventDefault();action();}
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

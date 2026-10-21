@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modernization Sequencing</title>
+<style>
+
+:root{--paper:#f2efe9;--paper2:#e6e2d9;--ink:#1f2933;--muted:#77808c;--olive:#2f7d5b;--rust:#c1502f;--amber:#b07d2b;--violet:#4a6fa5;--navy:#182030}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--paper);color:var(--ink)}body{font-family:Arial,Helvetica,sans-serif;overflow:hidden}#viewport{position:fixed;inset:0;display:grid;place-items:center}#canvas{position:relative;width:1600px;height:900px;flex-shrink:0;transform-origin:center center;background:var(--paper)}
+.slide{position:absolute;inset:0;padding:76px 100px 68px;--accent:var(--olive);--fit:1;overflow:visible}.slide[hidden]{display:none!important}.slide-inner{height:100%;display:flex;flex-direction:column;gap:24px;position:relative;z-index:1}.slide h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:calc(80px * var(--fit));line-height:1.08;margin:0;letter-spacing:-.025em;overflow-wrap:break-word}.eyebrow{color:var(--accent);font-size:calc(22px * var(--fit));font-weight:bold;letter-spacing:.14em;text-transform:uppercase;margin:0}.content{font-size:calc(36px * var(--fit));line-height:1.32;min-height:0;flex:1}.content p{margin:0 0 .65em}.content ul{margin:0;padding:0;list-style:none}.rail>li{padding:.43em 0;border-top:1px solid #b9bab6}.children{padding-left:1.1em!important;margin-top:.25em!important;font-size:.82em;list-style:disc!important}.children>li{padding:.15em 0}.content strong{font-weight:700}.cards-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px}.cards-list>li{padding:30px;background:var(--paper2);border-top:5px solid var(--accent)}.columns{display:grid;grid-template-columns:1fr 1fr;gap:64px}.column h2{font-family:Georgia,serif;font-weight:400;font-size:calc(44px * var(--fit));margin:0 0 20px;color:var(--accent)}.polarity .column:first-child{--accent:var(--rust)}.polarity .column:last-child{--accent:var(--olive)}
+.cover,.part,.big{background:var(--navy);color:var(--paper)}.cover .slide-inner,.part .slide-inner,.divider .slide-inner,.big .slide-inner{justify-content:center}.cover h1,.part h1,.divider h1,.big h1{font-size:calc(116px * var(--fit));max-width:1300px}.cover .content:empty,.part .content:empty,.divider .content:empty,.big .content:empty{display:none}.quote .body{font-family:Georgia,serif;font-style:italic;font-size:calc(58px * var(--fit));line-height:1.22}.attribution,.credit,.citation{font-size:calc(23px * var(--fit));line-height:1.35;color:var(--muted)}.attribution{letter-spacing:.04em}.footer{font-family:Georgia,serif;font-style:italic;font-size:calc(27px * var(--fit));margin:0}.takeaway{border-left:5px solid var(--accent);padding:15px 24px;background:var(--paper2)}
+.photo,.somber{background:var(--navy);color:var(--paper)}.background-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.photo:after,.somber:after{content:'';position:absolute;inset:0;background:rgba(24,32,48,.34)}.somber:after{background:rgba(24,32,48,.62)}.photo h1,.somber h1{font-size:calc(112px * var(--fit));text-shadow:0 3px 16px #182030}.photo .slide-inner,.somber .slide-inner{justify-content:center}.photo .content:empty,.somber .content:empty{display:none}.photo .credit,.somber .credit{color:var(--paper)}
+.exhibit{margin:0;min-height:0;height:100%;display:flex;flex-direction:column;gap:12px}.exhibit img{width:100%;height:100%;min-height:0;object-fit:contain}.exhibit figcaption{flex:none}.img .content{display:flex;flex-direction:column;gap:16px}.img .exhibit{flex:1}.portraits{display:grid;grid-template-columns:1fr 1fr;gap:60px;height:100%;min-height:0}.portrait{margin:0;display:flex;flex-direction:column;min-height:0;gap:12px}.portrait img{width:100%;height:360px;object-fit:contain}.portrait figcaption{font-family:Georgia,serif;font-size:calc(38px * var(--fit))}.scholar-grid{display:grid;grid-template-columns:390px 1fr;gap:54px;height:100%;min-height:0}.scholar-grid img{width:100%;max-height:480px;object-fit:contain}.scholar-copy{min-width:0}.scholar-copy .citation{margin-bottom:28px}
+.meters{display:flex;gap:60px;margin-top:auto;padding-top:12px}.meter{flex:1}.meter-label{font-size:calc(21px * var(--fit));margin-bottom:12px}.axis-labels{display:flex;justify-content:space-between;font-size:18px;letter-spacing:.06em;margin-bottom:14px}.axis-labels span:first-child{color:var(--rust)}.axis-labels span:last-child{color:var(--olive)}.track{height:7px;position:relative;background:linear-gradient(to right,var(--rust),var(--paper2),var(--olive));margin:0 9px 10px}.marker{position:absolute;left:var(--position);top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--ink);border:3px solid var(--paper)}.lens-axis{margin:80px 0}.lens-axis .track{height:14px}.lens-axis .axis-labels{font-size:28px}
+#progress{position:fixed;left:0;bottom:0;height:4px;background:var(--amber);width:0;z-index:10}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media print{@page{size:1600px 900px;margin:0}html,body{height:auto;overflow:visible}#viewport{position:static;display:block}#canvas{transform:none!important;height:auto} .slide,.slide[hidden]{display:block!important;position:relative;width:1600px;height:900px;break-after:page;page-break-after:always} [data-reveal]{visibility:visible!important;opacity:1!important}#progress,#player-status{display:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+/* Review copy only: the library supplies the progress display. */
+#progress{display:none!important}
+</style>
+</head>
+<body data-mode="review" data-deck-id="lecture-1" data-storage-key="chartroom:94324379b2e7d621">
+<main id="viewport" aria-label="Lecture slides"><div id="canvas">
+<section class="slide cover" data-slide="0" style="--accent:var(--olive)" aria-labelledby="slide-title-0">
+<div class="slide-inner">
+<h1 id="slide-title-0">Modernization Sequencing</h1>
+<div class="content"></div>
+
+</div>
+</section>
+
+<section class="slide big" data-slide="1" style="--accent:var(--olive)" aria-labelledby="slide-title-1" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-1">The Great Divergence</h1>
+<div class="content"></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="2" style="--accent:var(--olive)" aria-labelledby="slide-title-2" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-2">The Great Divergence</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Some countries successfully become wealthy and stable.<ul class="children">
+<li>Others did not.</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="3" style="--accent:var(--olive)" aria-labelledby="slide-title-3" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-3">Rostow&#39;s Modernization Theory:</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Economic development is a consequence of societal changes.</li>
+<li data-reveal>All societies follow a predictable path</li>
+<li data-reveal>5 Stages<ul class="children">
+<li>Traditional society</li>
+<li>Preconditions for take-off</li>
+<li>Take-off</li>
+<li>Drive to maturity</li>
+<li>Age of high mass consumption</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="4" style="--accent:var(--olive)" aria-labelledby="slide-title-4" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-4">Fukuyama&#39;s Political Order Theory:</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Development is a balance between three forces:<ul class="children">
+<li>Centralized states</li>
+<li>Rule of law</li>
+<li>Accountability mechanisms</li>
+</ul></li>
+<li data-reveal>Imbalance = Failure.</li>
+<li data-reveal>Wrong Order = Failure.</li>
+<li data-reveal>Authoritarianism can promote early development.</li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="5" style="--accent:var(--olive)" aria-labelledby="slide-title-5" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-5">Acemoglu and Robinson&#39;s Institutionalist Theory:</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Development is the result of economic activity<ul class="children">
+<li>Economic activity requires stability and property rights.</li>
+</ul></li>
+<li data-reveal>Inclusive institutions lead to protected property rights..<ul class="children">
+<li>Institutions in a feedback loop.</li>
+<li>Inclusive institutions need to come first.</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide cards" data-slide="6" style="--accent:var(--olive)" aria-labelledby="slide-title-6" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-6">Potential Sequences</h1>
+<div class="content"><ul class="cards-list">
+<li><strong>Order First:</strong> Societies must establish stable political order first, then democracy, then economic growth will follow.</li>
+<li><strong>Institutions First:</strong> Societies must establish inclusive institutions first, then economic growth will follow.</li>
+<li><strong>Democracy First:</strong> Societies must establish rules of the game that lead to health and technology expansion first.</li>
+<li><strong>Modernization Theory:</strong> Societies must have economic transition first, then democracy will inevitably follow.</li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide cards" data-slide="7" style="--accent:var(--olive)" aria-labelledby="slide-title-7" hidden inert>
+<div class="slide-inner">
+<p class="eyebrow">The problem?</p>
+<h1 id="slide-title-7">What Comes First?</h1>
+<div class="content"><ul class="cards-list">
+<li><strong>Economy</strong><ul class="children">
+<li>To create social transformation and new needs and desires.</li>
+<li>To change social norms and weaken tradition.</li>
+</ul></li>
+<li><strong>Democracy</strong><ul class="children">
+<li>To create an environment where people can create growth themselves.</li>
+<li>To reward education and health care.</li>
+<li>To protect property rights.</li>
+</ul></li>
+<li><strong>Bureaucracy</strong><ul class="children">
+<li>To handle the stresses caused by political and economic change that will follow.</li>
+<li>State capacity is necessary.</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide big" data-slide="8" style="--accent:var(--olive)" aria-labelledby="slide-title-8" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-8">Potential Traps</h1>
+<div class="content"></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="9" style="--accent:var(--olive)" aria-labelledby="slide-title-9" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-9">Clientilism</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Democracy before Bureaucracy.</li>
+<li data-reveal>Vote your friends money.</li>
+<li data-reveal>Strong institutions blocked.</li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="10" style="--accent:var(--olive)" aria-labelledby="slide-title-10" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-10">Bureaucratic Authoritarianism</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Bureaucracy before Democracy.</li>
+<li data-reveal>Block economic changes and political chances that threaten the bureaucracy.</li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="11" style="--accent:var(--olive)" aria-labelledby="slide-title-11" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-11">Oligarchy</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Economy before Democracy.</li>
+<li data-reveal>Use economy to enrich leaders, ignore expensive bureaucracy</li>
+<li data-reveal>Taxes are a waste of effort.</li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="12" style="--accent:var(--olive)" aria-labelledby="slide-title-12" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-12">Fickle Democrats</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Democracy before Economy.</li>
+<li data-reveal>Elected leaders cannot force short term cost for long term gain on the people.</li>
+<li data-reveal>Interest groups as veto players</li>
+</ul></div>
+
+</div>
+</section>
+
+<section class="slide facts" data-slide="13" style="--accent:var(--olive)" aria-labelledby="slide-title-13" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-13">Sequence #1</h1>
+<div class="content"><ul class="rail">
+<li data-reveal>Democracy</li>
+<li data-reveal>Economy</li>
+<li data-reveal>Bureaucracy</li>
+</ul></div>
+<p class="footer">Where does this order break down?</p>
+</div>
+</section>
+
+<section class="slide cards" data-slide="14" style="--accent:var(--olive)" aria-labelledby="slide-title-14" hidden inert>
+<div class="slide-inner">
+<h1 id="slide-title-14">Possible Sequences</h1>
+<div class="content"><ul class="cards-list">
+<li><strong>Sequence 1</strong><ul class="children">
+<li>Democracy</li>
+<li>Economy</li>
+<li>Bureaucracy</li>
+</ul></li>
+<li><strong>Sequence 2</strong><ul class="children">
+<li>Democracy</li>
+<li>Bureaucracy</li>
+<li>Economy</li>
+</ul></li>
+<li><strong>Sequence 3</strong><ul class="children">
+<li>Bureaucracy</li>
+<li>Democracy</li>
+<li>Economy</li>
+</ul></li>
+<li><strong>Sequence 4</strong><ul class="children">
+<li>Bureaucracy</li>
+<li>Economy</li>
+<li>Democracy</li>
+</ul></li>
+<li><strong>Sequence 5</strong><ul class="children">
+<li>Economy</li>
+<li>Democracy</li>
+<li>Bureaucracy</li>
+</ul></li>
+<li><strong>Sequence 6</strong><ul class="children">
+<li>Economy</li>
+<li>Bureaucracy</li>
+<li>Democracy</li>
+</ul></li>
+</ul></div>
+
+</div>
+</section>
+</div></main>
+<div id="progress" aria-hidden="true"></div>
+<p id="player-status" class="sr-only" role="status" aria-live="polite"></p>
+<script>
+/* Review-only bridge for the PSC 334 library; original Studio fitting retained. */
+(function deckPlayer() {
+    'use strict';
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const review = document.body.dataset.mode === 'review';
+    let index = 0, step = 0;
+    const max = i => review || !slides[i] ? 0 : slides[i].querySelectorAll('[data-reveal]').length;
+    const clamp = (n,lo,hi) => Math.max(lo,Math.min(hi,n));
+    const getState = () => ({index,step,count:slides.length});
+    let parentOrigin = location.origin;
+    try {parentOrigin = document.referrer ? new URL(document.referrer).origin : (location.ancestorOrigins && location.ancestorOrigins[0]) || location.origin;} catch (_) {}
+    // Chromium reports file:// in ancestorOrigins but serializes message origins as null.
+    if (parentOrigin === 'file://') parentOrigin = 'null';
+    const images=Array.from(document.images);
+    const post = type => {if (parent !== window) parent.postMessage({type,...getState(),total:slides.length,resourcesReady:images.every(img=>img.complete),failedImages:images.filter(img=>img.complete && !img.naturalWidth).length},parentOrigin === 'null' ? '*' : parentOrigin);};
+    window.addEventListener('message',event=>{
+      if(parent === window || event.source !== parent || event.origin !== parentOrigin || !event.data || event.data.type !== 'chartroom:command')return;
+      const actions={next,previous,first:home,last:end,go:()=>go(event.data.index),state:()=>post('chartroom:state'),escape:()=>post('chartroom:exit')};
+      if(Object.prototype.hasOwnProperty.call(actions,event.data.action))actions[event.data.action]();
+    });
+    const storageKey = document.body.dataset.storageKey;
+    if (!review) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (saved && Number.isInteger(saved.index) && Number.isInteger(saved.step) && slides.length) {
+          index=clamp(saved.index,0,slides.length-1);step=clamp(saved.step,0,max(index));
+        }
+      } catch (_) { /* Local-file privacy settings and corrupt saves are harmless. */ }
+    }
+    function show() {
+      if (!review) {try {localStorage.setItem(storageKey,JSON.stringify(getState()));} catch (_) {}}
+      slides.forEach((s,i) => {
+        s.hidden = i !== index; s.inert = i !== index;
+        s.setAttribute('aria-hidden',String(i !== index));
+        s.querySelectorAll('[data-reveal]').forEach((el,j) => {
+          const visible = review || j < (i === index ? step : 0);
+          el.style.visibility = visible ? 'visible' : 'hidden';
+          el.setAttribute('aria-hidden',String(!visible));
+        });
+      });
+      post('chartroom:state');
+      document.getElementById('progress').style.width = (slides.length ? (index + 1) / slides.length * 100 : 0) + '%';
+      document.getElementById('player-status').textContent = slides.length ? 'Slide ' + (index + 1) + ' of ' + slides.length + ': ' + slides[index].querySelector('h1').textContent : 'No slides';
+    }
+    function go(n) { if (Number.isFinite(n) && slides.length) {index=clamp(Math.trunc(n),0,slides.length-1);step=0;show();} return getState(); }
+    function next() {if(step<max(index)){step++;show();}else if(index<slides.length-1)go(index+1);return getState();}
+    function previous() {if(step>0){step--;show();}else if(index>0){index--;step=max(index);show();}return getState();}
+    function home(){return go(0);}
+    function end(){if(slides.length){index=slides.length-1;step=max(index);show();}return getState();}
+    function resize() {
+      const canvas=document.getElementById('canvas');
+      canvas.style.position='absolute';canvas.style.left='50%';canvas.style.top='50%';
+      canvas.style.transform='translate(-50%,-50%) scale(' + Math.min(innerWidth/1600,innerHeight/900) + ')';
+    }
+    function measure(s) {
+      const inner=s.querySelector('.slide-inner'),content=s.querySelector('.content');
+      const overflowX=Math.max(0,inner.scrollWidth-inner.clientWidth,content.scrollWidth-content.clientWidth);
+      const overflowY=Math.max(0,inner.scrollHeight-inner.clientHeight,content.scrollHeight-content.clientHeight);
+      return {overflow:overflowX>2 || overflowY>2,overflowX,overflowY};
+    }
+    function audit() {
+      const results=slides.map((s,i)=>{
+        const wasHidden=s.hidden;s.hidden=false;
+        s.style.setProperty('--fit',1);
+        let fit=1,overflow=measure(s);
+        while(overflow.overflow && fit>.751){fit=Math.max(.75,fit-.025);s.style.setProperty('--fit',fit.toFixed(3));overflow=measure(s);}
+        s.dataset.overflow=String(overflow.overflow);s.dataset.fit=fit.toFixed(3);s.hidden=wasHidden;
+        return {slide:i,title:s.querySelector('h1').textContent,fit:Number(fit.toFixed(3)),...overflow};
+      });
+      document.body.dataset.overflow=String(results.some(r=>r.overflow));
+      return results;
+    }
+    window.ChartroomPlayer = {next,previous,home,end,go,getState,audit};
+    window.addEventListener('resize',resize);
+    window.addEventListener('load',()=>{resize();audit();post('chartroom:state');});
+    images.forEach(img=>{const settled=()=>{audit();post('chartroom:state');};img.addEventListener('load',settled);img.addEventListener('error',settled);});
+    resize();audit();
+    document.addEventListener('keydown',event => {
+      if(event.altKey || event.ctrlKey || event.metaKey || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(event.target.tagName) || event.target.isContentEditable)return;
+      const action = {ArrowRight:next,ArrowDown:next,' ':next,PageDown:next,ArrowLeft:previous,ArrowUp:previous,PageUp:previous,Home:home,End:end,Escape:()=>post('chartroom:exit')}[event.key];
+      if(action){event.preventDefault();action();}
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

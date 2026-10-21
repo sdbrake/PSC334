@@ -11,7 +11,7 @@ This folder is the **PSC 334 student review website**, not the master copy of yo
 | Location (under `HermesAssistant/`) | What it is | What to do with it |
 | --- | --- | --- |
 | `Lecture Slides/` | Original teaching lectures — the source of truth | Teach from these; make your lecture revisions here. |
-| `IPE Course Library/` | The current seven-lecture student review website | Open its `index.html` to browse the library. |
+| `IPE Course Library/` | The current twelve-lecture student review website | Open its `index.html` to browse the library. |
 | `IPE Course Library/lectures/` | Separate review copies and images | Prepare copies here for students, never move the originals here. |
 | `Course Library/` | Earlier one-lecture design prototype | Reference only; use `IPE Course Library/` for this course. |
 | `IPE Course Library - portable.zip` | A packaged snapshot of the review website | Extract the whole ZIP before opening `index.html`; it is not a live/synced copy. |
@@ -36,7 +36,7 @@ This folder is the **PSC 334 student review website**, not the master copy of yo
 
 Double-click **index.html** to open in Chrome or Edge. Keep the folder together: index.html needs the other files beside it. The website also works on an ordinary static web host such as GitHub Pages. This copy has not been published.
 
-This is the seven-lecture **PSC 334 / International Political Economy** edition. The approved one-lecture prototype remains in the separate `Course Library` folder.
+This is the twelve-lecture **PSC 334 / International Political Economy** edition. The approved one-lecture prototype remains in the separate `Course Library` folder.
 
 | Order | Sidebar title | Slides | Source deck |
 | --- | --- | --- | --- |
@@ -47,8 +47,13 @@ This is the seven-lecture **PSC 334 / International Political Economy** edition.
 | 05 | Global Growth and Inequality | 42 | Global Growth and Inequality - slides.html |
 | 06 | Society-Based Theory | 12 | Stolper Samuelson - chartroom.html |
 | 07 | State-Based Theory | 22 | State Centered Trade - chartroom.html |
+| 08 | Industrialization / Development | 30 | finished lectures/Development/Teaching revision/Development - Student review.html |
+| 09 | The Washington Consensus | 28 | finished lectures/Washington Consensus/Washington Consensus - chartroom.html |
+| 10 | Modernization Sequencing | 15 | UU/IPE/Lesson Plans/SequencingDevelopment.html |
+| 11 | MNCs and Politics / FDI | 13 | UU/IPE/Lesson Plans/FDIandMNC.html |
+| 12 | The Impossible Trinity | 12 | UU/IPE/Slideshow Workshop/impossibletrinity.html |
 
-Slots 08–14 remain Coming soon. **160 slides total.** Sidebar titles follow the requested list (including the two renamed theory lectures); the original titles inside the decks are preserved.
+Slots 13–14 remain Coming soon. **258 slides total.** Sidebar titles follow the requested list (including the two renamed theory lectures); the original titles inside the decks are preserved.
 
 ## What you normally edit
 
@@ -90,7 +95,7 @@ The shell is reusable across classes. Its bundled player specifically understand
 
 1. **Copy**, do not move, the lecture into a new folder such as `lectures/trade-theory/`. Copy its `images/` folder too, keeping the same relative layout. Do not edit the teaching original.
 2. Name the copied HTML `index.html` (or use its actual filename in course.js).
-3. In this **review copy**, replace the old final navigation `<script> ... </script>` block with this single line:
+3. For a legacy `.s` deck, in this **review copy**, replace the old final navigation `<script> ... </script>` block with this single line (for a Studio `.slide` export, use the separate bridge adaptation below instead):
 
    ```html
    <script src="../../deck-player.js"></script>
@@ -113,7 +118,9 @@ The shell is reusable across classes. Its bundled player specifically understand
    Use `null` until it is ready. Numbering comes from the list order; do not type the number into the title.
 5. Open the library, click that lecture, try the controls, then select it again to confirm it starts at slide one.
 
-The supported deck structure is a fixed-size `#canvas` containing slides with class `.s`; the active slide uses `.on`. The player reads the canvas dimensions, scales it to fit, and centers it. Standard chartroom bullet reveals (`.rail .f` and `.rail .conseq`) are shown immediately for review. Different slide frameworks require their own adapter; simply linking an arbitrary HTML URL is not enough to connect navigation.
+The shared player supports a fixed-size `#canvas` containing `.s` slides with `.on` marking the active slide. It reveals `.rail .f` and `.rail .conseq`; decks using `.step` also need review-only visibility CSS. Canvas positioning must match the shared player (absolute positioning, top-left transform origin).
+
+**Studio exports are different:** they use `.slide`, `hidden`, `[data-reveal]`, and an automatic text-fit routine. Do not replace their player with `deck-player.js`. Set review mode and adapt the original inline player's message bridge as documented under Original lecture preservation. Keep the original fitting routine. Simply linking an arbitrary HTML URL does not connect navigation.
 
 All lecture files should live in this website folder / on the same web origin. Cross-origin embeds are intentionally not accepted by the control bridge. Use only trusted, professor-authored HTML; this is not an untrusted-file upload service.
 
@@ -122,7 +129,7 @@ All lecture files should live in this website folder / on the same web origin. C
 1. Make and save the revision in the **teaching original** under `Lecture Slides/`.
 2. Keep a backup of its current review folder before replacing anything.
 3. Copy the revised HTML and any changed/new images into the matching `IPE Course Library/lectures/` folder. Keep the destination filename/path the same so `course.js` still points to it.
-4. **Replace the old navigation script again in the new review copy.** Copying a fresh teaching HTML file also copies its teaching player back in. Use the single `../../deck-player.js` script line shown above, in place of the old navigation block.
+4. **Reapply the review navigation adaptation.** Copying fresh teaching HTML also restores its teaching player. For legacy `.s` decks, use the single `../../deck-player.js` line. For Studio `.slide` exports, retain the fitting player, set review mode, and reapply the library bridge adaptation.
 5. Check for review-only layout adjustments before discarding the backup. In the included Global Growth and Inequality deck, `review-compact` is a spacing fix for **Convergence is uncommon**. Preserve/reapply it if still needed; do not copy it back into the original automatically.
 6. Open the library. Check changed slides, images, Previous/Next, and that reselecting the lecture returns to slide one.
 7. If publishing, upload/push the revised review HTML and any changed assets to the same website location. The professor handles publishing. No Apps Script redeployment is involved.
@@ -169,7 +176,9 @@ A public GitHub Pages site is public: only publish material intended for public 
 
 ## Original lecture preservation
 
-All seven decks were copied from their matching folders under `Lecture Slides/`. Their original files and images were left untouched. Each review copy uses the shared navigation script instead of the old teaching script; lecture wording is preserved exactly.
+The original seven review decks remain unchanged. The five additions come from `TeachingMaterials/finished lectures/` and `Lesson Prep/UU/IPE/`, as listed above. Teaching originals and source images are untouched; slide wording and order are preserved exactly. Development uses the revised, source-faithful edition without the dated joke image, not the earlier IPE-folder export. The actual revised HTML contains 30 slides.
+
+The Washington Consensus uses the shared `deck-player.js`, with review-only reveal CSS and top-left canvas positioning. Its two images are embedded as data URLs. The four Studio exports keep their original automatic text-fitting player, set `data-mode="review"`, and adapt their message bridge to this library: `chartroom:state` with `total`, `chartroom:command` with `action`, and `chartroom:exit`. Library `first`/`last` actions map to Studio home/end. Their progress bars are hidden in favor of the library controls. The Impossible Trinity's two images are also embedded. These changes exist only in the review copies.
 
 One review-only spacing repair was needed: slide 8, **Convergence is uncommon**, in Global Growth and Inequality has tighter vertical spacing to keep its last sentence within the canvas. This is clearly marked `review-compact` in that copied HTML file. No words were changed or removed.
 
@@ -181,7 +190,9 @@ The fallback fullscreen view keeps Tab focus within the presentation and tempora
 
 The website needs no development dependencies. `tests/` is excluded from the portable ZIP.
 
-The focused browser script `tests/course.test.cjs` checks the seven-lecture order, every slide, local images, bullet reveals, restart-on-selection, mobile menu and fallback fullscreen focus. It runs installed Chrome on Windows. The source manifest records original-file hashes for preservation checks.
+The current ad-hoc browser check is `TeachingMaterials/Deck Work/IPE Library Update/verify_library.py`, outside this publish folder. It uses installed Chrome and checks all 12 lectures / 258 slides under both offline `file://` and a local HTTP server: slide order, visible reveals, image decoding, navigation, restart-on-selection, mobile menu, and fallback fullscreen. It also checks new-deck canvas fitting and Studio text overflow. `source-manifest.json` records teaching-source hashes and the unchanged existing library files; slide-text comparisons verify verbatim preservation. Backups and screenshots stay in that private work folder.
+
+Run from that work folder with `python verify_library.py`. It uses the existing Playwright dependency under `TeachingMaterials/Political Philosophy Reader/tools/python`. The older prototype test instructions below are historical and are not the current verification entry point.
 
 These are **ad-hoc verification scripts**, not a canonical build or test suite.
 
